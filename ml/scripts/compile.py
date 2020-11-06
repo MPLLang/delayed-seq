@@ -52,6 +52,12 @@ if __name__ == "__main__":
     metavar = 'BENCHMARK',
     help = 'name of the benchmark in bench/'
   )
+  required.add_argument('-i', '--impl',
+    required = True,
+    dest = 'impl',
+    metavar = 'IMPL',
+    help = 'name of implementation (subdirectory of chosen benchmark)'
+  )
   required.add_argument('-c', '--config',
     required = True,
     dest = 'config',
@@ -76,7 +82,7 @@ if __name__ == "__main__":
   def relativePath(path):
     return os.path.join(root, path)
 
-  sourceMLB = relativePath("bench/{}/{}.mlb".format(args.benchmark, args.benchmark))
+  sourceMLB = relativePath("bench/{}/{}/sources.mlb".format(args.benchmark, args.impl))
   if not os.path.isfile(sourceMLB):
     eprint("no such file: {}".format(sourceMLB))
     die()

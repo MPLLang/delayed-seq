@@ -29,7 +29,8 @@ $ ./report
 ## Notes
 
 * In `cpp/` and `ml/`, there needs to be a `Makefile` that has targets
-of the form `BENCH.CONFIG.bin`.
+of the form `BENCH.IMPL.CONFIG.bin`, for example `mcss.array.mpl.bin` and
+`primes.delay.cpp.bin`.
 
 * The `ml-exp.json` and `cpp-exp.json` files are passed to the `scripts/gencmds`
 utility. Ask Sam about documentation. Basically, `gencmds` produces a bunch
