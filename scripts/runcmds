@@ -1,0 +1,112 @@
+#!/usr/bin/python
+
+import sys, signal, socket, time, threading, subprocess, multiprocessing
+from datetime import datetime
+
+NCPU = multiprocessing.cpu_count()
+
+def getGitRoot():
+  return subprocess.Popen(['git', 'rev-parse', '--show-toplevel'],
+    stdout=subprocess.PIPE).communicate()[0].rstrip()
+
+_currentChild = None
+def _signalHandler(signal, frame):
+  sys.stderr.write("[ERR] Interrupted.\n")
+  if _currentChild:
+    _currentChild.kill()
+  sys.exit(1)
+signal.signal(signal.SIGINT, _signalHandler)
+
+def _killer():
+  if _currentChild:
+    try:
+      _currentChild.kill()
+    except Exception as e:
+      sys.stderr.write("[WARN] Error while trying to kill process {}: {}\n".format(_currentChild.pid, str(e)))
+
+def runcmds(rows, repeat=1, timeout=300.0, silent=False):
+  repeat = max(repeat, 1)
+  numCmds = len(rows) * repeat
+  cmdNum = 1
+
+  for row in rows:
+    for _ in xrange(0, repeat):
+      row = row.copy()
+      if not silent:
+        sys.stderr.write('[{}/{}] {}\n'.format(cmdNum, numCmds, row['cmd']))
+      cmdNum += 1
+      row['host'] = socket.gethostname()
+      row['timestamp'] = datetime.now().strftime("%y-%m-%d %H:%M:%S.%f")
+      if 'cwd' in row:
+        _currentChild = subprocess.Popen(row['cmd'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=row['cwd'])
+      else:
+        _currentChild = subprocess.Popen(row['cmd'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      timer = threading.Timer(timeout, _killer)
+      row['stdout'] = ''
+      row['stderr'] = ''
+      ts = time.time()
+      try:
+        timer.start()
+        row['stdout'], row['stderr'] = _currentChild.communicate()
+      finally:
+        timer.cancel()
+        row['elapsed'] = time.time() - ts
+      row['returncode'] = _currentChild.returncode
+      yield row
+
+# scripty part =============================================================
+
+if __name__ == "__main__":
+  import argparse, json, os.path
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-r', '--repeat', type=int, default=1, dest='repeat')
+  parser.add_argument('-t', '--timeout', type=float, default=300.0, dest='timeout')
+  parser.add_argument('-s', '--silent', action='store_true', dest='silent')
+  parser.add_argument('-o', '--output', type=argparse.FileType('a'), default=sys.stdout, dest='output')
+  parser.add_argument('-b', '--bare', action = 'store_true', dest = 'bare')
+  parser.add_argument('-c', '--compile', action = 'store_true', dest = 'compile')
+  args = parser.parse_args()
+
+  root = getGitRoot()
+
+  if args.bare:
+    rows = [{'cmd':x.rstrip('\n')} for x in sys.stdin]
+  else:
+    rows = [ json.loads(x) for x in sys.stdin ]
+
+  if args.compile:
+    binsToMake = set()
+    for r in rows:
+      binFile = '{}.{}.bin'.format(r['bench'], r['config'])
+      suffix = os.path.join('bin', binFile)
+      prefix = root
+      if 'cwd' in r:
+        prefix = os.path.join(prefix, r['cwd'])
+      if not os.path.isfile(os.path.join(prefix, suffix)):
+        binsToMake.add((prefix, binFile))
+
+    places = set(prefix for (prefix, _) in binsToMake)
+
+    for place in places:
+      binsToMakeHere = filter(lambda (prefix, _): prefix == place, binsToMake)
+      binsToMakeHere = map(lambda (_, b): b, binsToMakeHere)
+      if len(binsToMakeHere) == 0:
+        continue
+
+      sys.stderr.write("[WARN] missing binaries in {}:\n".format(place))
+      for b in binsToMakeHere:
+        sys.stderr.write("  " + b + "\n")
+
+      jobs = max(4, NCPU/2)
+      cmd = "make -C {} -j {} ".format(place, jobs) + (" ".join(binsToMakeHere))
+      sys.stderr.write("[INFO] " + cmd + "\n")
+      out = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+      sys.stderr.write(out + "\n")
+
+  for result in runcmds(rows, repeat=args.repeat, timeout=args.timeout, silent=args.silent):
+    s = '{}\n'.format(json.dumps(result))
+    args.output.write(s)
+    if not args.silent:
+      sys.stderr.write(result['stdout'] + '\n')
+      sys.stderr.write(result['stderr'] + '\n')

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+ROOT=$(git rev-parse --show-toplevel)
+GEN=scripts/gencmds
+RUN=scripts/runcmds
+
+NOW=$(date '+%y%m%d-%H%M%S')
+mkdir -p $ROOT/results
+RESULTS=$ROOT/results/$NOW
+
+# all of the extra arguments get sent to scripts/runcmds.py with $@ below
+$GEN $ROOT/ml-exp.json \
+| $RUN --repeat 1 --compile --output $RESULTS $@
+echo "[INFO] wrote timings results to $RESULTS"
