@@ -1,0 +1,8 @@
+../../../lib/sources.mlb
+../MkPrimes.sml
+local
+  ArrayPrimes.sml
+in
+  structure Primes = ArrayPrimes
+end
+../main.sml

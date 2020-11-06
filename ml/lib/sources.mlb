@@ -5,7 +5,15 @@ compat/$(COMPAT).mlb
 CommandLineArgs.sml
 Util.sml
 SeqBasis.sml
-Seq.sml
+(* Seq.sml *)
+SEQUENCE.sml
+local
+  ArraySequence.sml
+in
+  structure Seq = ArraySequence
+  structure ArraySequence
+end
+DelayedSeq.sml
 FuncSequence.sml
 BinarySearch.sml
 Merge.sml

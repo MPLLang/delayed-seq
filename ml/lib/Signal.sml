@@ -61,9 +61,11 @@ struct
   val blockWidth = CommandLineArgs.parseInt "comb-width" 600
   val blockHeight = CommandLineArgs.parseInt "comb-height" 50
   val combGran = CommandLineArgs.parseInt "comb-threshold" 10000
+(*
   val _ = print ("comb-width " ^ Int.toString blockWidth ^ "\n")
   val _ = print ("comb-height " ^ Int.toString blockHeight ^ "\n")
   val _ = print ("comb-threshold " ^ Int.toString combGran ^ "\n")
+*)
 
   (* Imagine laying out the data as a matrix, where sample s[i*D + j] is
    * at row i, column j.
