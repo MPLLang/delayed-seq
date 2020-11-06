@@ -1,5 +1,5 @@
-# disentangled-check
-Experiments to test the performance of checking for disentanglement with MPL.
+# delayed-seq
+Experiments with parallel delayed sequences in ML and CPP
 
 ## Setup
 
