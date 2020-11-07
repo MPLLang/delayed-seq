@@ -78,7 +78,7 @@ if __name__ == "__main__":
   if args.compile:
     binsToMake = set()
     for r in rows:
-      binFile = '{}.{}.bin'.format(r['bench'], r['config'])
+      binFile = '{}.{}.{}.bin'.format(r['bench'], r['impl'], r['config'])
       suffix = os.path.join('bin', binFile)
       prefix = root
       if 'cwd' in r:
