@@ -62,6 +62,12 @@
         "bench": ["integrate"],
         "impl": ["array", "delay"],
         "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["wc"],
+        "bench": ["wc"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
       }
     ]
 }

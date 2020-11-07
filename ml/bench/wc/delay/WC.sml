@@ -1,0 +1,1 @@
+structure WC = MkWC (DelayedSeq)
