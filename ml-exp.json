@@ -32,6 +32,12 @@
         "bench": ["primes"],
         "impl": ["opt", "array", "delay"],
         "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["bignum-add"],
+        "bench": ["bignum-add"],
+        "impl": ["opt", "array", "delay"],
+        "args": ["-n 100000000"]
       }
     ]
 }

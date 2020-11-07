@@ -4,6 +4,7 @@ sig
   val reportTime: (unit -> 'a) -> 'a
 
   val closeEnough: real * real -> bool
+  val rtos: real -> string
 
   val die: string -> 'a
 
@@ -44,6 +45,10 @@ sig
   val loop: (int * int) -> 'a -> ('a * int -> 'a) -> 'a
 
   val copyListIntoArray: 'a list -> 'a array -> int -> int
+
+  type timer
+  val startTiming: unit -> timer
+  val tick: timer -> string -> timer
 end =
 struct
 
@@ -271,5 +276,33 @@ struct
         in
           toInt v
         end)
+
+  fun rtos x =
+    if x < 0.0 then "-" ^ rtos (~x)
+    else Real.fmt (StringCvt.FIX (SOME 3)) x
+
+  type timer = Time.time
+
+  val reportTicks = CommandLineArgs.parseFlag "report-ticks"
+
+  fun startTiming () =
+    if not reportTicks then Time.zeroTime else
+    Time.now ()
+
+  fun tick t msg =
+    if not reportTicks then t else
+    let
+      val t' = Time.now ()
+      val elapsed = Time.toReal (Time.- (t', t))
+      val _ = print ("tick " ^ rtos elapsed ^ " " ^ msg ^ "\n")
+    in
+      t'
+    end
+
+  val (startTiming, tick) =
+    if reportTicks then
+      (startTiming, tick)
+    else
+      (fn _ => Time.zeroTime, fn t => fn _ => t)
 
 end
