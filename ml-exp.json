@@ -44,6 +44,12 @@
         "bench": ["parens"],
         "impl": ["array", "delay"],
         "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["linefit"],
+        "bench": ["linefit"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
       }
     ]
 }
