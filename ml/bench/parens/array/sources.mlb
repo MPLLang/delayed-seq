@@ -1,0 +1,8 @@
+../../../lib/sources.mlb
+../MkParens.sml
+local
+  ArrayParens.sml
+in
+  structure Parens = ArrayParens
+end
+../main.sml

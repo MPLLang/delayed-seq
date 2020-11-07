@@ -1,0 +1,1 @@
+structure ArrayParens = MkParens (ArraySequence)
