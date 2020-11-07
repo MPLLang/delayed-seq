@@ -1,0 +1,1 @@
+structure MCSS = MkAllPrefixScanMCSS (ArraySequence)

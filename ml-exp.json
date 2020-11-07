@@ -28,6 +28,12 @@
         "args": ["-n 100000000"]
       },
       {
+        "tag": ["mcss-prefixes"],
+        "bench": ["mcss-prefixes"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
+      },
+      {
         "tag": ["primes"],
         "bench": ["primes"],
         "impl": ["opt", "array", "delay"],
