@@ -50,6 +50,12 @@
         "bench": ["linefit"],
         "impl": ["array", "delay"],
         "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["integrate"],
+        "bench": ["integrate"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
       }
     ]
 }

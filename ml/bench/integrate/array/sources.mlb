@@ -1,0 +1,8 @@
+../../../lib/sources.mlb
+../MkIntegrate.sml
+local
+  ArrayIntegrate.sml
+in
+  structure Integrate = ArrayIntegrate
+end
+../main.sml

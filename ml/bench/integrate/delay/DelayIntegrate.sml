@@ -1,0 +1,1 @@
+structure DelayIntegrate = MkIntegrate (DelayedSeq)
