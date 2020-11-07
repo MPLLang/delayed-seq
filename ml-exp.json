@@ -26,6 +26,12 @@
         "bench": ["mcss"],
         "impl": ["opt", "array", "delay"],
         "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["primes"],
+        "bench": ["primes"],
+        "impl": ["opt", "array", "delay"],
+        "args": ["-n 100000000"]
       }
     ]
 }
