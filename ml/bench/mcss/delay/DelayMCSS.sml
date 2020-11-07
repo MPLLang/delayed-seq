@@ -1,0 +1,1 @@
+structure DelayMCSS = MkMapReduceMCSS (DelayedSeq)

@@ -1,0 +1,1 @@
+structure ArrayMCSS = MkMapReduceMCSS (ArraySequence)

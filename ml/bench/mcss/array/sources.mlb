@@ -1,0 +1,8 @@
+../../../lib/sources.mlb
+../MkMapReduceMCSS.sml
+local
+  ArrayMCSS.sml
+in
+  structure MCSS = ArrayMCSS
+end
+../main.sml

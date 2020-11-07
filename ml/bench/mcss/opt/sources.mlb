@@ -1,0 +1,7 @@
+../../../lib/sources.mlb
+local
+  DCMCSS.sml
+in
+  structure MCSS = DCMCSS
+end
+../main.sml

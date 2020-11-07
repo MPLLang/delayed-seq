@@ -14,7 +14,7 @@
   "globals":
     {
       "procs": ["1", "10", "20", "30", "40", "50", "60", "70"],
-      "config": ["mpl"],
+      "config": ["mpl-cc"],
       "cwd": ["ml"],
       "args1": ["-repeat 10 -warmup 5"]
     },
@@ -22,10 +22,10 @@
   "specs":
     [
       {
-        "tag": ["fib"],
-        "bench": ["fib"],
-        "impl": ["opt"],
-        "args": ["-N 42"]
+        "tag": ["mcss"],
+        "bench": ["mcss"],
+        "impl": ["opt", "array", "delay"],
+        "args": ["-n 100000000"]
       }
     ]
 }
