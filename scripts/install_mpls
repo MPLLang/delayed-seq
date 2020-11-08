@@ -7,6 +7,8 @@ if find_executable("mpl-switch") is None:
   sys.stderr.write("[ERR] mpl-switch needs to be installed. see https://github.com/MPLLang/mpl-switch\n")
   sys.exit(1)
 
+subprocess.check_call(["mpl-switch", "init"])
+
 def getGitRoot():
   return subprocess.Popen(['git', 'rev-parse', '--show-toplevel'],
     stdout=subprocess.PIPE).communicate()[0].rstrip()

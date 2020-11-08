@@ -1,13 +1,14 @@
 # delayed-seq
-Experiments with parallel delayed sequences in ML and CPP
+Experiments with parallel delayed sequences using MPL and C++
 
 ## Setup
 
-Fist, install [`mpl-switch`](https://github.com/MPLLang/mpl-switch). Then,
-run the following to install versions of `mpl` needed for experiments. This
-will take a long time.
+First, install [`mpl-switch`](https://github.com/MPLLang/mpl-switch).
+
+Next, run the following to install versions of `mpl` needed for experiments.
+This will take a long time.
 ```
-$ scripts/init
+$ ./init
 ```
 
 ## Run it
