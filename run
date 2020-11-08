@@ -9,6 +9,8 @@ mkdir -p $ROOT/results
 RESULTS=$ROOT/results/$NOW
 
 # all of the extra arguments get sent to scripts/runcmds.py with $@ below
-$GEN $ROOT/ml-exp.json \
-| $RUN --repeat 1 --compile --output $RESULTS $@
-echo "[INFO] wrote timings results to $RESULTS"
+( \
+  $GEN $ROOT/ml-exp.json; \
+  $GEN $ROOT/cpp-exp.json \
+) | $RUN --repeat 1 --compile --output $RESULTS $@
+echo "[INFO] wrote results to $RESULTS"

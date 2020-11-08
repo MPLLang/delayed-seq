@@ -1,0 +1,26 @@
+{
+  "templates":
+    [
+      {
+        "match": { "config": "cpp" },
+        "template": "/usr/bin/time -v bin/<bench>.<impl>.<config>.bin <procs?-proc {}> <args?{}> <args1?{}>"
+      }
+    ],
+
+  "globals":
+    {
+      "procs": ["1", "10", "20", "30", "40", "50", "60", "70"],
+      "config": ["cpp"],
+      "cwd": ["cpp"]
+    },
+
+  "specs":
+    [
+      {
+        "tag": ["mcss"],
+        "bench": ["mcss"],
+        "impl": ["array"],
+        "args": ["-n 100000000"]
+      }
+    ]
+}
