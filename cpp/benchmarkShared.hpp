@@ -64,7 +64,7 @@ void initialize(int argc, char **argv) {
   }
   warmup(nb_proc);
 }
-  
+
 template <class Bench>
 void launch(const Bench& bench) {
   struct timezone tzp({0,0});
@@ -73,16 +73,19 @@ void launch(const Bench& bench) {
     gettimeofday(&now, &tzp);
     return ((double) now.tv_sec) + ((double) now.tv_usec)/1000000.;
   };
+  size_t repeat_n = deepsea::cmdline::parse_or_default_int("repeat", 1);
 #ifdef CILK_RUNTIME_WITH_STATS
   cilk_sync;
   __cilkg_take_snapshot_for_stats();
 #endif
-  auto st = get_time();
-  bench();
-  printf ("exectime %.3lf\n", get_time() - st);
+  for (int i = 0; i < repeat_n; i++) {
+    auto st = get_time();
+    bench();
+    printf ("exectime %.4lfs\n", get_time() - st);
+  }
 #ifdef CILK_RUNTIME_WITH_STATS
   __cilkg_dump_encore_stats_to_stderr();
 #endif
 }
-  
+
 } // end namespace

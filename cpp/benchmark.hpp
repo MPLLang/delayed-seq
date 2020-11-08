@@ -40,7 +40,7 @@ void warmup(int nb_proc) {
     size_t n = 100000000;
     auto A = parlay::tabulate(n, [] (size_t i) -> double {return 1.0;});
   }
-  printf ("warmuptime %.3lf\n", get_time() - st);
+  printf ("warmuptime %.4lfs\n", get_time() - st);
 }
 
 } // end namespace
