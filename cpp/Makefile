@@ -30,26 +30,30 @@ SEQDBG_PREFIX=$(DBG_PREFIX)
 PBBSLIBCPP_PREFIX=$(OPT_PREFIX) $(CILK_COMMON_PREFIX)
 PBBSLIBCPPHG_PREFIX=$(OPT_PREFIX) $(HOMEGROWN_COMMON_PREFIX)
 
+.PHONY: install_folder
+install_folder:
+	mkdir -p $(INSTALL_FOLDER)
+
 # Debugging binaries
 # ------------------
 
-%.pardbg.bin: %.cpp $(INCLUDE_FILES)
-	$(CPP) $(PARDBG_PREFIX) $(INCLUDE_DIRECTIVES) -o $@ $<
+%.pardbg.bin: %.cpp $(INCLUDE_FILES) install_folder
+	$(CPP) $(PARDBG_PREFIX) $(INCLUDE_DIRECTIVES) -o $(INSTALL_FOLDER)/$@ $<
 
-%.seqdbg.bin: %.cpp $(INCLUDE_FILES)
-	$(CPP) $(SEQDBG_PREFIX) $(INCLUDE_DIRECTIVES) -o $@ $<
+%.seqdbg.bin: %.cpp $(INCLUDE_FILES) install_folder
+	$(CPP) $(SEQDBG_PREFIX) $(INCLUDE_DIRECTIVES) -o $(INSTALL_FOLDER)/$@ $<
 
 # Optimized binaries
 # ------------------
 
-%.cpp.bin: %.cpp $(INCLUDE_FILES)
-	$(CPP) $(PBBSLIBCPP_PREFIX) $(INCLUDE_DIRECTIVES) -o $@ $< $(JEMALLOC)
+%.cpp.bin: %.cpp $(INCLUDE_FILES) install_folder
+	$(CPP) $(PBBSLIBCPP_PREFIX) $(INCLUDE_DIRECTIVES) -o $(INSTALL_FOLDER)/$@ $< $(JEMALLOC)
 
-%.cppstats.bin: %.cpp $(INCLUDE_FILES)
-	$(CPP) $(PBBSLIBCPP_PREFIX) $(INCLUDE_DIRECTIVES) $(CILK_EXTRAS_PREFIX) -o $@ $< $(JEMALLOC)
+%.cppstats.bin: %.cpp $(INCLUDE_FILES) install_folder
+	$(CPP) $(PBBSLIBCPP_PREFIX) $(INCLUDE_DIRECTIVES) $(CILK_EXTRAS_PREFIX) -o $(INSTALL_FOLDER)/$@ $< $(JEMALLOC)
 
-%.cpphg.bin: %.cpp $(INCLUDE_FILES)
-	$(CPP) $(PBBSLIBCPPHG_PREFIX) $(INCLUDE_DIRECTIVES) -o $@ $< $(JEMALLOC)
+%.cpphg.bin: %.cpp $(INCLUDE_FILES) install_folder
+	$(CPP) $(PBBSLIBCPPHG_PREFIX) $(INCLUDE_DIRECTIVES) -o $(INSTALL_FOLDER)/$@ $< $(JEMALLOC)
 
 
 PROGRAMS=\
