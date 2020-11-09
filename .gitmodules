@@ -1,3 +1,6 @@
 [submodule "cpp/cppdelayed"]
 	path = cpp/cppdelayed
 	url = https://github.com/gblelloch/cppdelayed.git
+[submodule "cpp/pbbsbench"]
+	path = cpp/pbbsbench
+	url = https://github.com/cmuparlay/pbbsbench.git

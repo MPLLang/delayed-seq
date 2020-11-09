@@ -21,8 +21,11 @@ void cilk_set_nb_workers(int nb_workers) {
 }
 
 void setProc(int nb_proc) {
-#ifndef HOMEGROWN
+#if defined(PARLAY_CILK)
   cilk_set_nb_workers(nb_proc);
+#elif defined(PARLAY_HOMEGROWN)
+  // calling this function seems to cause a crash 
+  //  parlay::internal::get_default_scheduler().set_num_workers(nb_proc);
 #endif
 }
 
