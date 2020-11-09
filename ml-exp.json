@@ -68,6 +68,12 @@
         "bench": ["wc"],
         "impl": ["array", "delay"],
         "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["sparse-mxv"],
+        "bench": ["sparse-mxv"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
       }
     ]
 }
