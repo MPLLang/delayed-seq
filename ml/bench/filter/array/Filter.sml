@@ -1,0 +1,2 @@
+structure Filter = MkFilter (ArraySequence)
+

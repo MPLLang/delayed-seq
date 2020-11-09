@@ -1,0 +1,7 @@
+../../../lib/sources.mlb
+local
+  ArrayFilter.sml
+in
+  structure Filter = ArrayFilter
+end
+../main.sml
