@@ -80,6 +80,12 @@
         "bench": ["filter"],
         "impl": ["opt", "array", "delay"],
         "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["tokens"],
+        "bench": ["tokens"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
       }
     ]
 }
