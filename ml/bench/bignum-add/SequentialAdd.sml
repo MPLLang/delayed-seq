@@ -4,21 +4,19 @@ struct
   structure AS = ArraySlice
   structure Seq = ArraySequence
 
-  type bignum = Bit.t Seq.t
+  (* radix 128 *)
+  type byte = Word8.word
+  type bignum = byte Seq.t
 
   fun addWithCarry3 (c, b1, b2) =
-    case Bit.toInt c + Bit.toInt b1 + Bit.toInt b2 of
-      0 =>
-        {result = Bit.ZERO, carry = Bit.ZERO}
-    | 1 =>
-        {result = Bit.ONE, carry = Bit.ZERO}
-    | 2 =>
-        {result = Bit.ZERO, carry = Bit.ONE}
-    | _ =>
-        {result = Bit.ONE, carry = Bit.ONE}
+    let
+      val x = Word8.+ (b1, Word8.+ (b2, c))
+    in
+      {result = Word8.andb (x, 0wx7F), carry = Word8.>> (x, 0w7)}
+    end
 
   fun addWithCarry2 (b1, b2) =
-    addWithCarry3 (Bit.ZERO, b1, b2)
+    addWithCarry3 (0w0, b1, b2)
 
   fun add (s1, s2) =
     let
@@ -68,10 +66,10 @@ struct
         * If it is 1, then the output is well-formed.
         * If it is 0, we need to trim.
         *)
-      case loop 0 Bit.ZERO of
-        Bit.ZERO =>
+      case loop 0 0w0 of
+        0w0 =>
           AS.slice (r, 0, SOME n)
-      | Bit.ONE =>
+      | _ =>
           AS.full r
     end
 
