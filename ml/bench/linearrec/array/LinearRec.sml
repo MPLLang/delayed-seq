@@ -1,0 +1,1 @@
+structure LinearRec = MkLinearRec (ArraySequence)

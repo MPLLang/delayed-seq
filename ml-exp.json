@@ -86,6 +86,12 @@
         "bench": ["tokens"],
         "impl": ["array", "delay"],
         "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["linearrec"],
+        "bench": ["linearrec"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
       }
     ]
 }
