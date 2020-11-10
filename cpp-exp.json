@@ -9,7 +9,7 @@
 
   "globals":
     {
-      "procs": ["1", "10", "20", "30", "40", "50", "60", "70"],
+      "procs": ["1", "10", "20", "30", "40", "50", "60", "72"],
       "config": ["cpp"],
       "cwd": ["cpp"],
       "args1": ["-repeat 10"]
@@ -20,7 +20,73 @@
       {
         "tag": ["mcss"],
         "bench": ["mcss"],
-        "impl": ["array"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["mcss-prefixes"],
+        "bench": ["mcss-prefixes"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["bignum-add"],
+        "bench": ["bignum-add"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["integrate"],
+        "bench": ["integrate"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["linearrec"],
+        "bench": ["linearrec"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["linefit"],
+        "bench": ["linefit"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["filter"],
+        "bench": ["filter"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["primes"],
+        "bench": ["primes"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["quickhull"],
+        "bench": ["quickhull"],
+        "impl": ["array", "delay"],
+        "args": ["-infile /usr0/home/swestric/data/geom/2d/uniform-circle-10M"]
+      },
+      {
+        "tag": ["spmv"],
+        "bench": ["spmv"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["tokens"],
+        "bench": ["tokens"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["wc"],
+        "bench": ["wc"],
+        "impl": ["array", "delay"],
         "args": ["-n 100000000"]
       }
     ]

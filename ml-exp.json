@@ -3,7 +3,7 @@
     [
       {
         "match": { "config": "mpl" },
-        "template": "/usr/bin/time -v bin/<bench>.<impl>.<config>.bin @mpl <procs?procs {}> set-affinity affinity-base 1 -- <args?{} ><args1?{}>"
+        "template": "/usr/bin/time -v bin/<bench>.<impl>.<config>.bin @mpl <procs?procs {}> set-affinity -- <args?{} ><args1?{}>"
       },
       {
         "match": { "config": "mlton" },
@@ -13,7 +13,7 @@
 
   "globals":
     {
-      "procs": ["1", "10", "20", "30", "40", "50", "60", "70"],
+      "procs": ["1", "10", "20", "30", "40", "50", "60", "72"],
       "config": ["mpl-cc"],
       "cwd": ["ml"],
       "args1": ["-repeat 10 -warmup 5"]

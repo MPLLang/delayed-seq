@@ -1,13 +1,13 @@
 structure Benchmark =
 struct
 
-  fun getTimes n f =
+  fun getTimes msg n f =
     let
       fun loop tms n =
         let
           val (result, tm) = Util.getTime f
         in
-          print ("time " ^ Time.fmt 4 tm ^ "s\n");
+          print (msg ^ " " ^ Time.fmt 4 tm ^ "s\n");
 
           if n <= 1 then
             (result, List.rev (tm :: tms))
@@ -35,13 +35,13 @@ struct
       val _ =
         if warmup <= 0 then ()
         else ( print ("====== WARMUP ======\n" ^ msg ^ "\n")
-             ; ignore (getTimes warmup f)
+             ; ignore (getTimes "warmuptime" warmup f)
              ; print ("==== END WARMUP ====\n")
              )
 
       val _ = print (msg ^ "\n")
       val t0 = Time.now ()
-      val (result, tms) = getTimes rep f
+      val (result, tms) = getTimes "exectime" rep f
       val t1 = Time.now ()
       val endToEnd = Time.- (t1, t0)
 
