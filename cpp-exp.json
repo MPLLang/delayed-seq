@@ -72,7 +72,7 @@
         "args": ["-infile /usr0/home/swestric/data/geom/2d/uniform-circle-10M"]
       },
       {
-        "tag": ["spmv"],
+        "tag": ["sparse-mxv"],
         "bench": ["spmv"],
         "impl": ["array", "delay"],
         "args": ["-n 100000000"]
