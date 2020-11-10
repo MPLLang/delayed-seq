@@ -58,7 +58,30 @@ install_folder:
 
 
 PROGRAMS=\
-	mcss.array.cpp.bin
+	mcss.array \
+	mcss.delay \
+	bignum-add.array \
+	bignum-add.delay \
+	filter.array \
+	filter.delay \
+	integrate.array \
+	integrate.delay \
+	linearrec.array \
+	linearrec.delay \
+	linefit.array \
+	linefit.delay \
+	mcss-prefixes.array \
+	mcss-prefixes.delay \
+	primes.array \
+	primes.delay \
+	quickhull.array \
+	quickhull.delay \
+	spmv.array \
+	spmv.delay \
+	tokens.array \
+	tokens.delay \
+	wc.array \
+	wc.delay 
 
 all_cpp: $(PROGRAMS:%=%.cpp.bin)
 
