@@ -92,6 +92,12 @@
         "bench": ["linearrec"],
         "impl": ["array", "delay"],
         "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["quickhull"],
+        "bench": ["quickhull"],
+        "impl": ["array", "delay"],
+        "args": ["-infile /usr0/home/swestric/data/geom/2d/uniform-circle-10M"]
       }
     ]
 }

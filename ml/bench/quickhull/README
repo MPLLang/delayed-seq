@@ -1,0 +1,4 @@
+To run and visualize output:
+[.../sml]$ make quickhull.<config>.bin
+[.../sml]$ bin/quickhull.<config>.bin @MLton number-processors <P> -- -infile <points> -outfile <hull>
+[.../sml]$ bench/quickhull/showhull <points> <hull>

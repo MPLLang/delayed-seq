@@ -42,3 +42,7 @@ NewWaveIO.sml
 Signal.sml
 
 Benchmark.sml
+
+TreeSeq.sml
+ParseFile.sml
+Checkhull.sml

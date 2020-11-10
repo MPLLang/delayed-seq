@@ -266,6 +266,13 @@ struct
   | Nest of int * (int -> 'a Stream.t)
 
 
+  fun subseq s (i, k) =
+    case s of
+      Flat (Delay (start, stop, f)) => Flat (Delay (start+i, start+i+k, f))
+    | Flat (Full slice) => Flat (Full (AS.subslice (slice, i, SOME k)))
+    | _ => raise Fail "delay subseq (Nest) not implemented yet"
+
+
   fun flatNth (s: 'a flat) k =
     case s of
       Full slice =>
@@ -800,6 +807,5 @@ struct
   fun filterSome x = raise NYI
   fun foreach x = raise NYI
   fun foreachG x = raise NYI
-  fun subseq x = raise NYI
 
 end

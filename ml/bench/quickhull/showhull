@@ -1,0 +1,49 @@
+#!/usr/bin/python
+
+import sys
+# import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+# USAGE:
+# showhull pointsfile hullfile
+#
+# pointsfile is pbbs_sequencePoint2d
+# hullfile is pbbs_sequenceInt
+
+def parsePt(line):
+  [a,b] = line.split(" ")
+  return (float(a), float(b))
+
+with open(sys.argv[1], 'r') as f:
+  lines = [line.rstrip("\n") for line in f]
+  if lines[0] != "pbbs_sequencePoint2d":
+    sys.stderr.write("[ERR] first file must be a pbbs_sequencePoint2d\n")
+    sys.exit(1)
+  points = [ parsePt(line.rstrip("\n")) for line in lines[1:] ]
+
+with open(sys.argv[2], 'r') as f:
+  lines = [line.rstrip("\n") for line in f]
+  if lines[0] != "pbbs_sequenceInt":
+    sys.stderr.write("[ERR] first file must be a pbbs_sequenceInt\n")
+    sys.exit(1)
+  hull = [ int(line.rstrip("\n")) for line in lines[1:] ]
+
+hullPoints = [points[i] for i in hull]
+
+def X(pts):
+  return [x for (x,y) in pts]
+def Y(pts):
+  return [y for (x,y) in pts]
+
+def scat(pts, color, size):
+  plt.scatter(X(pts), Y(pts), color=color, s=size)
+
+scat(points, "black", 1)
+scat(hullPoints, "red", 10)
+plt.axis('square')
+# plt.savefig('hull.pdf', format='pdf')
+# print("[INFO] wrote to hull.pdf")
+plt.savefig('hull.png', format='png')
+print("[INFO] wrote to hull.png")

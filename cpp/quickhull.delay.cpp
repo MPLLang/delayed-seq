@@ -18,10 +18,13 @@ int main(int argc, char** argv) {
   auto infile = deepsea::cmdline::parse_or_default_string("infile", "points.txt");
   parlay::sequence<point> Points = readPointsFromFile<point>(infile.c_str());
   indexT r;
+  size_t len;
   pbbsBench::launch([&] {
     parlay::sequence<indexT> I = hull(Points);
     r = I[0];
+    len = I.size();
   });
+  std::cout << "size " << len << std::endl;
   std::cout << "result " << r << std::endl;
   return 0;
 }
