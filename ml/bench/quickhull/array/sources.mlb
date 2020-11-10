@@ -1,5 +1,9 @@
 ../../../lib/sources.mlb
-../MkSplit.sml
+local
+  ../MkPurishSplit.sml
+in
+  functor MkSplit = MkPurishSplit
+end
 ../MkQuickhull.sml
 Quickhull.sml
 ../main.sml
