@@ -81,7 +81,9 @@ PROGRAMS=\
 	tokens.array \
 	tokens.delay \
 	wc.array \
-	wc.delay 
+	wc.delay \
+	grep.array \
+	grep.delay
 
 all_cpp: $(PROGRAMS:%=%.cpp.bin)
 
