@@ -12,5 +12,5 @@ RESULTS=$ROOT/results/$NOW
 ( \
   $GEN $ROOT/ml-exp.json; \
   $GEN $ROOT/cpp-exp.json \
-) | $RUN --repeat 1 --compile --output $RESULTS $@
+) | $RUN --repeat 2 --compile --output $RESULTS $@
 echo "[INFO] wrote results to $RESULTS"

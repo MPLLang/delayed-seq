@@ -156,6 +156,7 @@ def averageSpace(data, config, tag, impl, procs):
   except:
     return None
 
+# ======================================================================
 
 def tm(t):
   if t is None:
@@ -182,6 +183,16 @@ def ov(x):
     return None
   return "{:.2f}".format(x)
 
+def rat(x):
+  if x is None:
+    return None
+  if x >= 10.0:
+    return str(int(round(x)))
+  if x >= 1:
+    return "{:.1f}".format(x)
+  else:
+    return "{:.2f}".format(x)
+
 def su(x):
   if x is None:
     return None
@@ -201,6 +212,78 @@ def sp(kb):
       return "%3.1f %s" % (num, unit)
     num = num / 1000
   return "%3.1f %s" % (num, 'T')
+
+def sfmt(xx):
+  if xx is None:
+    return "--"
+  elif type(xx) is str:
+    return xx
+  elif xx < 0.01:
+    return noLeadZero("{:.4f}".format(xx))
+  elif xx < 0.1:
+    return noLeadZero("{:.3f}".format(xx))
+  elif xx < 1.0:
+    return "{:.2f}".format(xx)
+  elif xx < 10.0:
+    return "{:.1f}".format(xx)
+  else:
+    return str(int(round(xx)))
+
+def spg(kb):
+  try:
+    gb = kb / (1000.0 * 1000.0)
+    if gb < .01:
+      return round(gb, 4)
+    elif gb < .1:
+      return round(gb, 3)
+    elif gb < 1.0:
+      return round(gb, 2)
+    elif gb < 10.0:
+      return round(gb, 1)
+    else:
+      return round(gb, 0)
+  except:
+    return None
+
+def makeBold(s):
+  try:
+    return "{\\bf " + s + "}"
+  except Exception as e:
+    sys.stderr.write("[WARN] " + str(e) + "\n")
+    return "--"
+
+def pcd(b, a):
+  try:
+    xx = int(round(100.0 * (b-a) / abs(a)))
+    return xx
+  except:
+    return None
+
+def latexpcd(b, a, highlight=True):
+  try:
+    xx = pcd(b, a)
+    result = ("+" if xx >= 0.0 else "") + ("{}\\%".format(xx))
+    if highlight and (xx < 0):
+      return makeBold(result)
+    else:
+      return result
+  except Exception as e:
+    sys.stderr.write("[WARN] " + str(e) + "\n")
+    return "--"
+
+def fmt(xx):
+  if xx is None:
+    return "--"
+  elif type(xx) is str:
+    return xx
+  # elif xx < 1.0:
+  #   return noLeadZero("{:.3f}".format(xx))
+  elif xx < 10.0:
+    return "{:.2f}".format(xx)
+  elif xx < 100.0:
+    return "{:.1f}".format(xx)
+  else:
+    return str(int(round(xx)))
 
 # =========================================================================
 
@@ -409,17 +492,29 @@ def noLeadZero(x):
 # print(table(tt, defaultAlign))
 # print("")
 
+def arrayTime(config, tag, procs):
+  return tm(averageTime(D, config, tag, 'array', procs))
+
+def delayTime(config, tag, procs):
+  return tm(averageTime(D, config, tag, 'delay', procs))
+
+def arraySpace(config, tag, procs):
+  return spg(averageSpace(D, config, tag, 'array', procs))
+
+def delaySpace(config, tag, procs):
+  return spg(averageSpace(D, config, tag, 'delay', procs))
+
 def arrayVsDelayTime(config, tag, procs):
   arrt = tm(averageTime(D, config, tag, 'array', procs))
   delt = tm(averageTime(D, config, tag, 'delay', procs))
-  rat = sd(arrt, delt)
-  return ov(rat)
+  frac = sd(arrt, delt)
+  return rat(frac)
 
 def arrayVsDelaySpace(config, tag, procs):
-  arrr = averageSpace(D, config, tag, 'array', procs)
-  delr = averageSpace(D, config, tag, 'delay', procs)
-  rat = sd(arrr, delr)
-  return ov(rat)
+  arrr = spg(averageSpace(D, config, tag, 'array', procs))
+  delr = spg(averageSpace(D, config, tag, 'delay', procs))
+  frac = sd(arrr, delr)
+  return rat(frac)
 
 header1 = ["Benchmark", "MPL(1)", "MPL({})".format(maxp), "C++(1)", "C++({})".format(maxp)]
 tt = [header1, "="]
@@ -454,5 +549,103 @@ for tag in orderedTags:
 print("ARRAY versus DELAY: space improvement factors")
 print(table(tt, defaultAlign))
 print("")
+
+# ===========================================================================
+
+def fmtRatio(frac):
+  if frac is None:
+    return "--"
+  try:
+    return makeBold(frac)
+  except:
+    return "--"
+
+mplTable = "figures/all-mpl.tex"
+with open(mplTable, 'w') as output:
+  for tag in orderedTags:
+
+    row = \
+      [ fmt(arrayTime('mpl-cc', tag, 1))
+      , fmt(delayTime('mpl-cc', tag, 1))
+      , fmtRatio(arrayVsDelayTime('mpl-cc', tag, 1))
+      , fmt(arrayTime('mpl-cc', tag, maxp))
+      , fmt(delayTime('mpl-cc', tag, maxp))
+      , fmtRatio(arrayVsDelayTime('mpl-cc', tag, maxp))
+      , sfmt(arraySpace('mpl-cc', tag, 1))
+      , sfmt(delaySpace('mpl-cc', tag, 1))
+      , fmtRatio(arrayVsDelaySpace('mpl-cc', tag, 1))
+      , sfmt(arraySpace('mpl-cc', tag, maxp))
+      , sfmt(delaySpace('mpl-cc', tag, maxp))
+      , fmtRatio(arrayVsDelaySpace('mpl-cc', tag, maxp))
+      ]
+
+    row = [x if x is not None else "--" for x in row]
+    output.write(" & ".join([tag] + row))
+    output.write("  \\\\\n")
+print("[INFO] wrote to {}".format(mplTable))
+
+cppTable = "figures/all-cpp.tex"
+with open(cppTable, 'w') as output:
+  for tag in orderedTags:
+
+    row = \
+      [ fmt(arrayTime('cpp', tag, 1))
+      , fmt(delayTime('cpp', tag, 1))
+      , fmtRatio(arrayVsDelayTime('cpp', tag, 1))
+      , fmt(arrayTime('cpp', tag, maxp))
+      , fmt(delayTime('cpp', tag, maxp))
+      , fmtRatio(arrayVsDelayTime('cpp', tag, maxp))
+      , sfmt(arraySpace('cpp', tag, 1))
+      , sfmt(delaySpace('cpp', tag, 1))
+      , fmtRatio(arrayVsDelaySpace('cpp', tag, 1))
+      , sfmt(arraySpace('cpp', tag, maxp))
+      , sfmt(delaySpace('cpp', tag, maxp))
+      , fmtRatio(arrayVsDelaySpace('cpp', tag, maxp))
+      ]
+
+    row = [x if x is not None else "--" for x in row]
+    output.write(" & ".join([tag] + row))
+    output.write("  \\\\\n")
+print("[INFO] wrote to {}".format(cppTable))
+
+
+# mplSpaceTable = "figures/mpl-space.tex"
+# with open(mplSpaceTable, 'w') as output:
+#   for tag in orderedTags:
+
+#     row = \
+#       [ sfmt(arraySpace('mpl-cc', tag, 1))
+#       , sfmt(delaySpace('mpl-cc', tag, 1))
+#       , arrayVsDelaySpace('mpl-cc', tag, 1)
+#       , sfmt(arraySpace('mpl-cc', tag, maxp))
+#       , sfmt(delaySpace('mpl-cc', tag, maxp))
+#       , arrayVsDelaySpace('mpl-cc', tag, maxp)
+#       ]
+
+#     row = [x if x is not None else "--" for x in row]
+#     output.write(" & ".join([tag] + row))
+#     output.write("  \\\\\n")
+# print("[INFO] wrote to {}".format(mplSpaceTable))
+
+
+# cppSpaceTable = "figures/cpp-space.tex"
+# with open(cppSpaceTable, 'w') as output:
+#   for tag in orderedTags:
+
+#     row = \
+#       [ sfmt(arraySpace('cpp', tag, 1))
+#       , sfmt(delaySpace('cpp', tag, 1))
+#       , arrayVsDelaySpace('cpp', tag, 1)
+#       , sfmt(arraySpace('cpp', tag, maxp))
+#       , sfmt(delaySpace('cpp', tag, maxp))
+#       , arrayVsDelaySpace('cpp', tag, maxp)
+#       ]
+
+#     row = [x if x is not None else "--" for x in row]
+#     output.write(" & ".join([tag] + row))
+#     output.write("  \\\\\n")
+# print("[INFO] wrote to {}".format(cppSpaceTable))
+
+# ===========================================================================
 
 print("[INFO] done reporting {}".format(timingsFile))
