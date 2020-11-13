@@ -24,80 +24,80 @@
       {
         "tag": ["mcss"],
         "bench": ["mcss"],
-        "impl": ["opt", "array", "delay"],
-        "args": ["-n 100000000"]
+        "impl": ["array", "delay"],
+        "args": ["-n 500000000"]
       },
       {
         "tag": ["mcss-prefixes"],
         "bench": ["mcss-prefixes"],
         "impl": ["array", "delay"],
-        "args": ["-n 100000000"]
+        "args": ["-n 500000000"]
       },
       {
         "tag": ["primes"],
         "bench": ["primes"],
-        "impl": ["opt", "array", "delay"],
+        "impl": ["array", "delay"],
         "args": ["-n 100000000"]
       },
       {
         "tag": ["bignum-add"],
         "bench": ["bignum-add"],
-        "impl": ["opt", "array", "delay"],
-        "args": ["-n 100000000"]
+        "impl": ["array", "delay"],
+        "args": ["-n 500000000"]
       },
       {
         "tag": ["parens"],
         "bench": ["parens"],
         "impl": ["array", "delay"],
-        "args": ["-n 100000000"]
+        "args": ["-n 500000000"]
       },
       {
         "tag": ["linefit"],
         "bench": ["linefit"],
         "impl": ["array", "delay"],
-        "args": ["-n 100000000"]
+        "args": ["-n 500000000"]
       },
       {
         "tag": ["integrate"],
         "bench": ["integrate"],
         "impl": ["array", "delay"],
-        "args": ["-n 100000000"]
+        "args": ["-n 500000000"]
       },
       {
         "tag": ["wc"],
         "bench": ["wc"],
         "impl": ["array", "delay"],
-        "args": ["-n 100000000"]
+        "args": ["-n 500000000"]
       },
       {
         "tag": ["sparse-mxv"],
         "bench": ["sparse-mxv"],
         "impl": ["array", "delay"],
-        "args": ["-n 100000000"]
+        "args": ["-n 200000000"]
       },
       {
         "tag": ["filter"],
         "bench": ["filter"],
-        "impl": ["opt", "array", "delay"],
-        "args": ["-n 100000000"]
+        "impl": ["array", "delay"],
+        "args": ["-n 500000000"]
       },
       {
         "tag": ["tokens"],
         "bench": ["tokens"],
         "impl": ["array", "delay"],
-        "args": ["-n 100000000"]
+        "args": ["-n 500000000"]
       },
       {
         "tag": ["linearrec"],
         "bench": ["linearrec"],
         "impl": ["array", "delay"],
-        "args": ["-n 100000000"]
+        "args": ["-n 500000000"]
       },
       {
         "tag": ["quickhull"],
         "bench": ["quickhull"],
         "impl": ["array", "delay"],
-        "args": ["-infile /usr0/home/swestric/data/geom/2d/uniform-circle-10M"]
+        "args": ["-infile /usr3/data/geom/2d/uniform-circle-20M"]
       }
     ]
 }

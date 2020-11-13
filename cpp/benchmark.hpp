@@ -24,26 +24,26 @@ void setProc(int nb_proc) {
 #if defined(PARLAY_CILK)
   cilk_set_nb_workers(nb_proc);
 #elif defined(PARLAY_HOMEGROWN)
-  // calling this function seems to cause a crash 
+  // calling this function seems to cause a crash
   //  parlay::internal::get_default_scheduler().set_num_workers(nb_proc);
 #endif
 }
 
-void warmup(int nb_proc) {
-  struct timezone tzp({0,0});
-  auto get_time = [&] {
-    timeval now;
-    gettimeofday(&now, &tzp);
-    return ((double) now.tv_sec) + ((double) now.tv_usec)/1000000.;
-  };
-  size_t dflt_warmup_n = (nb_proc == 1) ? 5 : 35;
-  size_t warmup_n = deepsea::cmdline::parse_or_default_int("warmup", dflt_warmup_n);
-  auto st = get_time();
-  for (int i = 0; i < warmup_n; i++) {
-    size_t n = 100000000;
-    auto A = parlay::tabulate(n, [] (size_t i) -> double {return 1.0;});
-  }
-  printf ("warmuptime %.4lfs\n", get_time() - st);
-}
+// void warmup(int nb_proc) {
+//   struct timezone tzp({0,0});
+//   auto get_time = [&] {
+//     timeval now;
+//     gettimeofday(&now, &tzp);
+//     return ((double) now.tv_sec) + ((double) now.tv_usec)/1000000.;
+//   };
+//   size_t dflt_warmup_n = (nb_proc == 1) ? 5 : 35;
+//   size_t warmup_n = deepsea::cmdline::parse_or_default_int("warmup", dflt_warmup_n);
+//   auto st = get_time();
+//   for (int i = 0; i < warmup_n; i++) {
+//     size_t n = 100000000;
+//     auto A = parlay::tabulate(n, [] (size_t i) -> double {return 1.0;});
+//   }
+//   printf ("warmuptime %.4lfs\n", get_time() - st);
+// }
 
 } // end namespace

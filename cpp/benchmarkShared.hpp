@@ -44,7 +44,7 @@ void initialize_hwloc(int nb_workers, bool numa_alloc_interleaved = true) {
 /* Benchmark initialization */
 
 void setProc(int);
-void warmup(int);
+// void warmup(int);
 
 /* The initialize function is guaranteed by GCC to be called by the
    system before main(), thanks to the constructor attribute on the
@@ -62,7 +62,7 @@ void initialize(int argc, char **argv) {
       deepsea::cmdline::parse_or_default_bool("numa_alloc_interleaved", numa_alloc_interleaved, false);
     initialize_hwloc(nb_proc, numa_alloc_interleaved);
   }
-  warmup(nb_proc);
+  // warmup(nb_proc);
 }
 
 template <class Bench>
@@ -74,10 +74,23 @@ void launch(const Bench& bench) {
     return ((double) now.tv_sec) + ((double) now.tv_usec)/1000000.;
   };
   size_t repeat_n = deepsea::cmdline::parse_or_default_int("repeat", 1);
+  double warmup_secs = deepsea::cmdline::parse_or_default_float("warmup", 3.0f);
 #ifdef CILK_RUNTIME_WITH_STATS
   cilk_sync;
   __cilkg_take_snapshot_for_stats();
 #endif
+
+  if (warmup_secs > 0.0f) {
+    printf ("======== WARMUP ========\n");
+    double warmupStart = get_time();
+    while (get_time() - warmupStart < warmup_secs) {
+      auto st = get_time();
+      bench();
+      printf ("warmup_run %.4lfs\n", get_time() - st);
+    }
+    printf ("======== END WARMUP ========\n");
+  }
+
   for (int i = 0; i < repeat_n; i++) {
     auto st = get_time();
     bench();
