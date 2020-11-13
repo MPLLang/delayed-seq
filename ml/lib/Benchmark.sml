@@ -20,22 +20,30 @@ struct
 
   fun run msg f =
     let
-      val warmup = CommandLineArgs.parseInt "warmup" 0
-      val _ =
-        if warmup >= 0 then ()
-        else Util.die "-warmup N must be at least 0"
+      val warmup = Time.fromReal (CommandLineArgs.parseReal "warmup" 0.0)
       val rep = CommandLineArgs.parseInt "repeat" 1
       val _ =
         if rep >= 1 then ()
         else Util.die "-repeat N must be at least 1"
 
-      val _ = print ("warmup " ^ Int.toString warmup ^ "\n")
+      val _ = print ("warmup " ^ Time.fmt 4 warmup ^ "\n")
       val _ = print ("repeat " ^ Int.toString rep ^ "\n")
 
+      fun warmupLoop startTime =
+        if Time.>= (Time.- (Time.now (), startTime), warmup) then
+          () (* warmup done! *)
+        else
+          let
+            val (_, tm) = Util.getTime f
+          in
+            print ("warmup_run " ^ Time.fmt 4 tm ^ "s\n");
+            warmupLoop startTime
+          end
+
       val _ =
-        if warmup <= 0 then ()
+        if Time.<= (warmup, Time.zeroTime) then ()
         else ( print ("====== WARMUP ======\n" ^ msg ^ "\n")
-             ; ignore (getTimes "warmuptime" warmup f)
+             ; warmupLoop (Time.now ())
              ; print ("==== END WARMUP ====\n")
              )
 
