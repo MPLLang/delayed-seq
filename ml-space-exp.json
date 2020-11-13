@@ -1,0 +1,99 @@
+{
+  "templates":
+    [
+      {
+        "match": {},
+        "template": "/usr/bin/time -v bin/<bench>.<impl>.mpl-cc-space.bin @mpl <procs?procs {}> set-affinity -- <args?{} ><args1?{}>"
+      }
+    ],
+
+  "globals":
+    {
+      "procs": ["1", "72"],
+      "config": ["mpl-cc-space"],
+      "cwd": ["ml"],
+      "args1": ["-repeat 1 -warmup 0"]
+    },
+
+  "specs":
+    [
+      {
+        "tag": ["mcss"],
+        "bench": ["mcss"],
+        "impl": ["array", "delay"],
+        "args": ["-n 500000000"]
+      },
+      {
+        "tag": ["mcss-prefixes"],
+        "bench": ["mcss-prefixes"],
+        "impl": ["array", "delay"],
+        "args": ["-n 500000000"]
+      },
+      {
+        "tag": ["primes"],
+        "bench": ["primes"],
+        "impl": ["array", "delay"],
+        "args": ["-n 100000000"]
+      },
+      {
+        "tag": ["bignum-add"],
+        "bench": ["bignum-add"],
+        "impl": ["array", "delay"],
+        "args": ["-n 500000000"]
+      },
+      {
+        "tag": ["parens"],
+        "bench": ["parens"],
+        "impl": ["array", "delay"],
+        "args": ["-n 500000000"]
+      },
+      {
+        "tag": ["linefit"],
+        "bench": ["linefit"],
+        "impl": ["array", "delay"],
+        "args": ["-n 500000000"]
+      },
+      {
+        "tag": ["integrate"],
+        "bench": ["integrate"],
+        "impl": ["array", "delay"],
+        "args": ["-n 500000000"]
+      },
+      {
+        "tag": ["wc"],
+        "bench": ["wc"],
+        "impl": ["array", "delay"],
+        "args": ["-n 500000000"]
+      },
+      {
+        "tag": ["sparse-mxv"],
+        "bench": ["sparse-mxv"],
+        "impl": ["array", "delay"],
+        "args": ["-n 200000000"]
+      },
+      {
+        "tag": ["filter"],
+        "bench": ["filter"],
+        "impl": ["array", "delay"],
+        "args": ["-n 500000000"]
+      },
+      {
+        "tag": ["tokens"],
+        "bench": ["tokens"],
+        "impl": ["array", "delay"],
+        "args": ["-n 500000000"]
+      },
+      {
+        "tag": ["linearrec"],
+        "bench": ["linearrec"],
+        "impl": ["array", "delay"],
+        "args": ["-n 500000000"]
+      },
+      {
+        "tag": ["quickhull"],
+        "bench": ["quickhull"],
+        "impl": ["array", "delay"],
+        "args": ["-infile /usr3/data/geom/2d/uniform-circle-20M"]
+      }
+    ]
+}

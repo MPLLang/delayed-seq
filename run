@@ -11,6 +11,7 @@ RESULTS=$ROOT/results/$NOW
 # all of the extra arguments get sent to scripts/runcmds.py with $@ below
 ( \
   $GEN $ROOT/ml-exp.json; \
-  $GEN $ROOT/cpp-exp.json \
+  $GEN $ROOT/cpp-exp.json; \
+  $GEN $ROOT/ml-space-exp.json \
 ) | $RUN --repeat 2 --compile --output $RESULTS $@
 echo "[INFO] wrote results to $RESULTS"
