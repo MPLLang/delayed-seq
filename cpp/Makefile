@@ -47,6 +47,9 @@ install_folder:
 # Optimized binaries
 # ------------------
 
+%.cpp-space.bin: %.cpp $(INCLUDE_FILES) install_folder
+	$(CPP) $(PBBSLIBCPP_PREFIX) $(INCLUDE_DIRECTIVES) -o $(INSTALL_FOLDER)/$@ $< $(JEMALLOC)
+
 %.cpp.bin: %.cpp $(INCLUDE_FILES) install_folder
 	$(CPP) $(PBBSLIBCPP_PREFIX) $(INCLUDE_DIRECTIVES) -o $(INSTALL_FOLDER)/$@ $< $(JEMALLOC)
 

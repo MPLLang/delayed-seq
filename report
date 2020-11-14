@@ -89,7 +89,8 @@ renameConfig = {
   'mlton': 'mlton',
   'mpl': 'mpl',
   'mpl-cc': 'mpl-cc',
-  'cpp': 'cpp'
+  'cpp': 'cpp',
+  'mpl-cc-space': 'mpl-cc-space'
 }
 
 foundTags = set()
@@ -420,10 +421,10 @@ for tag in orderedTags:
   for impl in implsOfTag(tag):
     thisRow = [tag,
                impl,
-               sp(averageSpace(D, 'mpl-cc', tag, impl, 1)),
-               sp(averageSpace(D, 'cpp', tag, impl, 1)),
-               sp(averageSpace(D, 'mpl-cc', tag, impl, maxp)),
-               sp(averageSpace(D, 'cpp', tag, impl, maxp))
+               sp(averageSpace(D, 'mpl-cc-space', tag, impl, 1)),
+               sp(averageSpace(D, 'cpp-space', tag, impl, 1)),
+               sp(averageSpace(D, 'mpl-cc-space', tag, impl, maxp)),
+               sp(averageSpace(D, 'cpp-space', tag, impl, maxp))
               ]
     thisRow = [ (x if x is not None else "--") for x in thisRow ]
     tt.append(thisRow)
@@ -538,10 +539,10 @@ tt = [header1, "="]
 for tag in orderedTags:
   row = [
     tag,
-    arrayVsDelaySpace('mpl-cc', tag, 1),
-    arrayVsDelaySpace('mpl-cc', tag, maxp),
-    arrayVsDelaySpace('cpp', tag, 1),
-    arrayVsDelaySpace('cpp', tag, maxp)
+    arrayVsDelaySpace('mpl-cc-space', tag, 1),
+    arrayVsDelaySpace('mpl-cc-space', tag, maxp),
+    arrayVsDelaySpace('cpp-space', tag, 1),
+    arrayVsDelaySpace('cpp-space', tag, maxp)
   ]
   row = [x if x is not None else "--" for x in row]
   tt.append(row)
@@ -571,12 +572,12 @@ with open(mplTable, 'w') as output:
       , fmt(arrayTime('mpl-cc', tag, maxp))
       , fmt(delayTime('mpl-cc', tag, maxp))
       , fmtRatio(arrayVsDelayTime('mpl-cc', tag, maxp))
-      , sfmt(arraySpace('mpl-cc', tag, 1))
-      , sfmt(delaySpace('mpl-cc', tag, 1))
-      , fmtRatio(arrayVsDelaySpace('mpl-cc', tag, 1))
-      , sfmt(arraySpace('mpl-cc', tag, maxp))
-      , sfmt(delaySpace('mpl-cc', tag, maxp))
-      , fmtRatio(arrayVsDelaySpace('mpl-cc', tag, maxp))
+      , sfmt(arraySpace('mpl-cc-space', tag, 1))
+      , sfmt(delaySpace('mpl-cc-space', tag, 1))
+      , fmtRatio(arrayVsDelaySpace('mpl-cc-space', tag, 1))
+      , sfmt(arraySpace('mpl-cc-space', tag, maxp))
+      , sfmt(delaySpace('mpl-cc-space', tag, maxp))
+      , fmtRatio(arrayVsDelaySpace('mpl-cc-space', tag, maxp))
       ]
 
     row = [x if x is not None else "--" for x in row]
@@ -595,12 +596,12 @@ with open(cppTable, 'w') as output:
       , fmt(arrayTime('cpp', tag, maxp))
       , fmt(delayTime('cpp', tag, maxp))
       , fmtRatio(arrayVsDelayTime('cpp', tag, maxp))
-      , sfmt(arraySpace('cpp', tag, 1))
-      , sfmt(delaySpace('cpp', tag, 1))
-      , fmtRatio(arrayVsDelaySpace('cpp', tag, 1))
-      , sfmt(arraySpace('cpp', tag, maxp))
-      , sfmt(delaySpace('cpp', tag, maxp))
-      , fmtRatio(arrayVsDelaySpace('cpp', tag, maxp))
+      , sfmt(arraySpace('cpp-space', tag, 1))
+      , sfmt(delaySpace('cpp-space', tag, 1))
+      , fmtRatio(arrayVsDelaySpace('cpp-space', tag, 1))
+      , sfmt(arraySpace('cpp-space', tag, maxp))
+      , sfmt(delaySpace('cpp-space', tag, maxp))
+      , fmtRatio(arrayVsDelaySpace('cpp-space', tag, maxp))
       ]
 
     row = [x if x is not None else "--" for x in row]
