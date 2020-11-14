@@ -8,8 +8,8 @@ NOW=$(date '+%y%m%d-%H%M%S')
 mkdir -p $ROOT/results
 RESULTS=$ROOT/results/$NOW
 
-rm -rf $ROOT/cpp/bin
-rm -rf $ROOT/ml/bin
+rm -f $ROOT/cpp/bin/*.bin
+rm -f $ROOT/ml/bin/*.bin
 
 # all of the extra arguments get sent to scripts/runcmds.py with $@ below
 ( \
