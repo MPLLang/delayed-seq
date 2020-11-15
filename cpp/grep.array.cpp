@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
   auto input = parlay::chars_from_file(infile.c_str(), true);
   size_t result;
   pbbsBench::launch([&] {
-    auto out_str = grep_delayed(input, pattern);
+    auto out_str = grep_strict(input, pattern);
     result = out_str.size();
   });
   std::cout << "result " << result << std::endl;
