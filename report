@@ -90,7 +90,8 @@ renameConfig = {
   'mpl': 'mpl',
   'mpl-cc': 'mpl-cc',
   'cpp': 'cpp',
-  'mpl-cc-space': 'mpl-cc-space'
+  'mpl-cc-space': 'mpl-cc-space',
+  'cpp-space': 'cpp-space'
 }
 
 foundTags = set()
@@ -167,8 +168,8 @@ def tm(t):
   # if t > 10.0:
   #   return int(round(t))
   try:
-    # if t < 1.0:
-    #   return round(t, 3)
+    if t < 1.0:
+      return round(t, 3)
     if t < 10.0:
       return round(t, 2)
     elif t < 100.0:
@@ -224,7 +225,7 @@ def sfmt(xx):
   elif xx < 0.1:
     return noLeadZero("{:.3f}".format(xx))
   elif xx < 1.0:
-    return "{:.2f}".format(xx)
+    return noLeadZero("{:.2f}".format(xx))
   elif xx < 10.0:
     return "{:.1f}".format(xx)
   else:
@@ -277,8 +278,8 @@ def fmt(xx):
     return "--"
   elif type(xx) is str:
     return xx
-  # elif xx < 1.0:
-  #   return noLeadZero("{:.3f}".format(xx))
+  elif xx < 1.0:
+    return noLeadZero("{:.3f}".format(xx))
   elif xx < 10.0:
     return "{:.2f}".format(xx)
   elif xx < 100.0:
