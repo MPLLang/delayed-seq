@@ -45,7 +45,7 @@
         "tag": ["parens"],
         "bench": ["parens"],
         "impl": ["array", "delay"],
-        "args": ["-n 500000000"]
+        "args": ["-n 1000000000"]
       },
       {
         "tag": ["linefit"],
@@ -94,6 +94,12 @@
         "bench": ["quickhull"],
         "impl": ["array", "delay"],
         "args": ["-infile /usr3/data/geom/2d/uniform-circle-20M"]
+      },
+      {
+        "tag": ["grep"],
+        "bench": ["grep"],
+        "impl": ["array", "delay"],
+        "args": ["-pattern ee -infile /usr0/home/swestric/proj/delayed-seq/inputs/sources4.txt"]
       }
     ]
 }

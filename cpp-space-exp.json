@@ -2,8 +2,12 @@
   "templates":
     [
       {
-        "match": {},
-        "template": "/usr/bin/time -v bin/<bench>.<impl>.cpp-space.bin <procs?-proc {}> <args?{}> <args1?{}>"
+        "match": { "config": "cpp-space", "procs": "(?!1$)" },
+        "template": "<procs?PARLAY_NUM_THREADS={}> /usr/bin/time -v numactl -i all -- bin/<bench>.<impl>.<config>.bin <args?{}> <args1?{}>"
+      },
+      {
+        "match": { "config": "cpp-space" },
+        "template": "<procs?PARLAY_NUM_THREADS={}> /usr/bin/time -v bin/<bench>.<impl>.<config>.bin <args?{}> <args1?{}>"
       }
     ],
 
@@ -54,6 +58,12 @@
         "args": ["-n 500000000"]
       },
       {
+        "tag": ["parens"],
+        "bench": ["parens"],
+        "impl": ["array", "delay"],
+        "args": ["-n 1000000000"]
+      },
+      {
         "tag": ["filter"],
         "bench": ["filter"],
         "impl": ["array", "delay"],
@@ -88,6 +98,12 @@
         "bench": ["wc"],
         "impl": ["array", "delay"],
         "args": ["-n 500000000"]
+      },
+      {
+        "tag": ["grep"],
+        "bench": ["grep"],
+        "impl": ["array", "delay"],
+        "args": ["-pattern ee -infile /usr0/home/swestric/proj/delayed-seq/inputs/sources4.txt"]
       }
     ]
 }

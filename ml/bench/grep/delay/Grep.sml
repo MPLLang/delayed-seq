@@ -1,0 +1,1 @@
+structure Grep = MkGrep (DelayedSeq)
