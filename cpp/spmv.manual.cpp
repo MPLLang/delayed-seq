@@ -42,6 +42,8 @@ int main(int argc, char** argv) {
   parlay::sequence<real_type> vec(numRows, 1.0);
   auto gen = [&] (size_t i, size_t j) { return make_pair(hashFn((i * rowLen + j)) % numRows, 1.0); };
   auto mat = parlay::tabulate(numRows, [&] (size_t i) { return parlay::tabulate(rowLen, [&] (size_t j) { return gen(i, j); }); });
+  // convert from sequence of sequences representation generated above to the representation
+  // expected by mat_vec_mult
   parlay::sequence<size_t> Out;
   size_t sum;
   tie(Out, sum) = parlay::scan(parlay::tabulate(mat.size(), [&] (size_t i) { return mat[i].size(); }));
@@ -59,5 +61,8 @@ int main(int argc, char** argv) {
     mat_vec_mult(starts, columns, values, in, parlay::make_slice(out), mult, add);
   });
   cout << "result " << result[0] << endl;
+  cout << "nb_rows " << numRows << endl;
+  cout << "n " << n << endl;
+  cout << "m " << m << endl;
   return 0;
 }
