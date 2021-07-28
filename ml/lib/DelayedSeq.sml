@@ -784,6 +784,8 @@ struct
         raise Fail "NewDelayedSeq.zipWith only partially implemented so far..."
 
 
+  fun zip (a, b) = zipWith (fn x => x) (a, b)
+
   (* ===================================================================== *)
 
   exception NYI
@@ -809,7 +811,6 @@ struct
   fun splitMid x = raise NYI
   fun take x = raise NYI
   fun update x = raise NYI
-  fun zip x = raise NYI
   fun zipWith3 x = raise NYI
 
   fun filterSome x = raise NYI
