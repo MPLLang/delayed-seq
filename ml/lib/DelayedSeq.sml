@@ -10,7 +10,7 @@ struct
   val gran = 5000
 
 
-  val blockSize = 10000
+  val blockSize = 5000
   fun numBlocks n = Util.ceilDiv n blockSize
 
 
@@ -78,28 +78,22 @@ struct
 
     (** A stream is a generator for a stateful trickle function:
       *   trickle = stream ()
-      *   x0 = trickle ()
-      *   x1 = trickle ()
-      *   x2 = trickle ()
+      *   x0 = trickle 0
+      *   x1 = trickle 1
+      *   x2 = trickle 2
       *   ...
+      *
+      *  The integer argument is just an optimization (it could be packaged
+      *  up into the state of the trickle function, but doing it this
+      *  way is more efficient). Requires passing `i` on the ith call
+      *  to trickle.
       *)
-    type 'a t = unit -> unit -> 'a
+    type 'a t = unit -> int -> 'a
     type 'a stream = 'a t
 
 
     fun tabulate f =
-      fn () =>
-        let
-          val stuff = ref 0
-        in
-          fn () =>
-            let
-              val i = !stuff
-            in
-              stuff := i+1;
-              f i
-            end
-        end
+      fn () => f
 
 
     fun map g stream =
@@ -115,16 +109,8 @@ struct
       fn () =>
         let
           val trickle = stream ()
-          val stuff = ref 0
         in
-          fn () =>
-            let
-              val elem = trickle ()
-              val idx = !stuff
-            in
-              stuff := idx+1;
-              g (idx, elem)
-            end
+          fn idx => g (idx, trickle idx)
         end
 
 
@@ -132,7 +118,7 @@ struct
       let
         val trickle = stream ()
         fun loop i =
-          if i >= length then () else (g (i, trickle ()); loop (i+1))
+          if i >= length then () else (g (i, trickle i); loop (i+1))
       in
         loop 0
       end
@@ -142,7 +128,7 @@ struct
       let
         val trickle = stream ()
         fun loop b i =
-          if i >= length then b else loop (g (b, trickle ())) (i+1)
+          if i >= length then b else loop (g (b, trickle i)) (i+1)
       in
         loop b 0
       end
@@ -154,10 +140,10 @@ struct
           val trickle = stream ()
           val stuff = ref b
         in
-          fn () =>
+          fn idx =>
             let
               val acc = !stuff
-              val elem = trickle ()
+              val elem = trickle idx
               val acc' = g (acc, elem)
             in
               stuff := acc';
@@ -172,10 +158,10 @@ struct
           val trickle = stream ()
           val stuff = ref b
         in
-          fn () =>
+          fn idx =>
             let
               val acc = !stuff
-              val elem = trickle ()
+              val elem = trickle idx
               val acc' = g (acc, elem)
             in
               stuff := acc';
@@ -190,8 +176,9 @@ struct
           val trickle1 = s1 ()
           val trickle2 = s2 ()
         in
-          fn () => g (trickle1 (), trickle2 ())
+          fn idx => g (trickle1 idx, trickle2 idx)
         end
+
 
     fun makeBlockStreams
           { numChildren: int
@@ -203,7 +190,7 @@ struct
           let
             val lo = blockIdx * blockSize
             val firstOuterIdx = indexSearch (0, numChildren, offset) lo
-            val firstInnerIdx = lo - offset firstOuterIdx
+            (* val firstInnerIdx = lo - offset firstOuterIdx *)
 
             fun advanceUntilNonEmpty i =
               if i >= numChildren orelse offset i <> offset (i+1) then
@@ -214,19 +201,20 @@ struct
             fn () =>
               let
                 val outerIdx = ref firstOuterIdx
-                val innerIdx = ref firstInnerIdx
+                (* val innerIdx = ref firstInnerIdx *)
               in
-                fn () =>
+                fn idx =>
                   let
                     val i = !outerIdx
-                    val j = !innerIdx
+                    val j = lo + idx - offset i
+                    (* val j = !innerIdx *)
                     val elem = getElem i j
                   in
                     if offset i + j + 1 < offset (i+1) then
-                      innerIdx := j+1
+                      (* innerIdx := j+1 *) ()
                     else
                       ( outerIdx := advanceUntilNonEmpty (i+1)
-                      ; innerIdx := 0
+                      (* ; innerIdx := 0 *)
                       );
 
                     elem
@@ -265,6 +253,26 @@ struct
       *)
   | Nest of int * (int -> 'a Stream.t)
 
+(*
+  fun makeBlocks s =
+    case s of
+      Flat (Full slice) =>
+        let
+          fun blockStream b =
+            Stream.tabulate (fn i => AS.nth slice (b*blockSize + i))
+        in
+          blockStream
+        end
+    | Flat (Delay (start, _, f)) =>
+        let
+          fun blockStream b =
+            Stream.tabulate (fn i => f (start + b*blockSize + i))
+        in
+          blockStream
+        end
+    | Nest (_, blockStream) =>
+        blockStream
+*)
 
   fun subseq s (i, k) =
     case s of
