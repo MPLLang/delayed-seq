@@ -10,7 +10,7 @@ struct
   val gran = 5000
 
 
-  val blockSize = 5000
+  val blockSize = 10000
   fun numBlocks n = Util.ceilDiv n blockSize
 
 
