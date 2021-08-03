@@ -8,31 +8,40 @@ struct
       val N = G.numVertices graph
       val M = G.numEdges graph
 
-      val flags = ForkJoin.alloc N
+      fun outEdges u =
+        Seq.map (fn v => (u, v)) (Seq.fromArraySeq (G.neighbors graph u))
+
+      val parents = ForkJoin.alloc N
       val _ = ForkJoin.parfor 10000 (0, N) (fn i =>
-        Array.update (flags, i, 0w0: Word8.word))
+        Array.update (parents, i, ~1))
 
       fun isVisited v =
-        Array.sub (flags, v) = 0w1
+        Array.sub (parents, v) <> ~1
 
-      fun visit v =
-        not (isVisited v) andalso
-        (0w0 = Concurrency.casArray (flags, v) (0w0, 0w1))
+      fun visit (u, v) =
+        if not (isVisited v) andalso
+           (~1 = Concurrency.casArray (parents, v) (~1, u))
+        then
+          SOME v
+        else
+          NONE
 
       fun loop frontier totalVisited =
-        if Seq.length frontier = 0 then totalVisited else
-        let
-          val allNeighbors = Seq.flatten (Seq.map (G.neighbors graph) frontier)
-          val count = Seq.length allNeighbors
-          val tmp = ForkJoin.alloc count
-        in
-          Seq.applyIdx allNeighbors (fn (i, u) =>
-            if visit u then
-              Array.update (tmp, i, u)
-            else
-              ???)
-        end
+        if Seq.length frontier = 0 then
+          totalVisited
+        else
+          let
+            val allNeighbors = Seq.flatten (Seq.map outEdges frontier)
+            val nextFrontier = Seq.mapOption visit allNeighbors
+          in
+            loop nextFrontier (totalVisited + Seq.length nextFrontier)
+          end
+
+      val _ = Array.update (parents, source, source)
+      val initFrontier = Seq.singleton source
+      val numVisited = loop initFrontier 1
     in
+      ArraySlice.full parents
     end
 
 end

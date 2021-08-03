@@ -253,7 +253,7 @@ struct
       *)
   | Nest of int * (int -> 'a Stream.t)
 
-(*
+
   fun makeBlocks s =
     case s of
       Flat (Full slice) =>
@@ -272,7 +272,7 @@ struct
         end
     | Nest (_, blockStream) =>
         blockStream
-*)
+
 
   fun subseq s (i, k) =
     case s of
@@ -520,6 +520,106 @@ struct
 
   fun reduce g b s =
     reduceG gran g b s
+
+
+  (** =======================================================================
+    * mapOption implementations
+    *
+    * first one delays output (like flattening)
+    * second one has eager output
+    *)
+
+  fun mapOption1 (f: 'a -> 'b option) (s: 'a seq) : 'b seq =
+    let
+      val n = length s
+      val nb = numBlocks n
+      val getBlock: int -> 'a Stream.t =
+        makeBlocks s
+
+      val results: 'b array = alloc n
+
+      fun packBlock b =
+        let
+          val start = b*blockSize
+          val stop = Int.min (start+blockSize, n)
+          val size = stop-start
+
+          fun doNext (off, x) =
+            case f x of
+              NONE => off
+            | SOME x' => (A.update (results, off, x'); off+1)
+
+          val lastOffset =
+            Stream.iterate doNext start (size, getBlock b)
+        in
+          lastOffset - start
+        end
+
+      val counts = SeqBasis.tabulate 1 (0, nb) packBlock
+      val offsets = SeqBasis.scan 10000 op+ 0 (0, A.length counts) (A.nth counts)
+
+      val totalLen = A.nth offsets nb
+      fun offset i = A.nth offsets i
+      val getBlock =
+        Stream.makeBlockStreams
+          { numChildren = nb
+          , offset = offset
+          , getElem = (fn i => fn j => A.nth results (i*blockSize + j))
+          }
+    in
+      Nest (totalLen, getBlock)
+    end
+
+
+  fun mapOption2 (f: 'a -> 'b option) (s: 'a seq) =
+    let
+      val n = length s
+      val nb = numBlocks n
+      val getBlock: int -> 'a Stream.t =
+        makeBlocks s
+
+      val results: 'b array = alloc n
+
+      fun packBlock b =
+        let
+          val start = b*blockSize
+          val stop = Int.min (start+blockSize, n)
+          val size = stop-start
+
+          fun doNext (off, x) =
+            case f x of
+              NONE => off
+            | SOME x' => (A.update (results, off, x'); off+1)
+
+          val lastOffset =
+            Stream.iterate doNext start (size, getBlock b)
+        in
+          lastOffset - start
+        end
+
+      val counts = SeqBasis.tabulate 1 (0, nb) packBlock
+      val outOff = SeqBasis.scan 10000 op+ 0 (0, A.length counts) (A.nth counts)
+      val outSize = A.sub (outOff, nb)
+
+      val result = alloc outSize
+    in
+      parfor (n div (Int.max (outSize, 1))) (0, nb) (fn i =>
+        let
+          val soff = i * blockSize
+          val doff = A.sub (outOff, i)
+          val size = A.sub (outOff, i+1) - doff
+        in
+          Util.for (0, size) (fn j =>
+            A.update (result, doff+j, A.sub (results, soff+j)))
+        end);
+
+      Flat (Full (ArraySlice.full result))
+    end
+
+
+  fun mapOption f s =
+    (* mapOption1 f s *)
+    mapOption2 f s
 
 
   fun filterIdx p s =

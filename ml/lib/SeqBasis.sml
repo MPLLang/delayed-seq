@@ -196,4 +196,141 @@ struct
       result
     end
 
+  (** =====================================================================
+    * pack/unpack
+    * elements are stored starting at the lsb
+    *)
+
+(*
+  fun pack8ElemsStartingAt i f =
+    let
+      open Word8
+      infix 2 << orb
+      val op+ = Int.+
+      val (w, c) = (0w0: Word8.word, 0: int)
+      val (w, c) = if f (i  ) then (w orb (0w1       ), c+1) else (w, c)
+      val (w, c) = if f (i+1) then (w orb (0w1 << 0w1), c+1) else (w, c)
+      val (w, c) = if f (i+2) then (w orb (0w1 << 0w2), c+1) else (w, c)
+      val (w, c) = if f (i+3) then (w orb (0w1 << 0w3), c+1) else (w, c)
+      val (w, c) = if f (i+4) then (w orb (0w1 << 0w4), c+1) else (w, c)
+      val (w, c) = if f (i+5) then (w orb (0w1 << 0w5), c+1) else (w, c)
+      val (w, c) = if f (i+6) then (w orb (0w1 << 0w6), c+1) else (w, c)
+      val (w, c) = if f (i+7) then (w orb (0w1 << 0w7), c+1) else (w, c)
+    in
+      (w, c)
+    end
+
+
+  fun packAtMost8ElemsInRange (i, j) f =
+    if i+8 > j then
+      raise Fail "SeqBasis.packAtMost8ElemsInRange: more than 8 elems"
+    else
+      Util.loop (0, j-i) (0w0: Word8.word, 0: int) (fn ((w, c), k) =>
+        if f (i+k) then
+          (Word8.orb (w, Word8.<< (0w1, Word.fromInt k)), c+1)
+        else
+          (w, c)
+      )
+
+
+  fun iterate8Flags (w: Word8.word) (b: 'a) (f: bool * 'a -> 'a) =
+    let
+      open Word8
+      infix 2 >> andb
+      val b = f (0w1 = ((w       ) andb 0w1), b)
+      val b = f (0w1 = ((w >> 0w1) andb 0w1), b)
+      val b = f (0w1 = ((w >> 0w2) andb 0w1), b)
+      val b = f (0w1 = ((w >> 0w3) andb 0w1), b)
+      val b = f (0w1 = ((w >> 0w4) andb 0w1), b)
+      val b = f (0w1 = ((w >> 0w5) andb 0w1), b)
+      val b = f (0w1 = ((w >> 0w6) andb 0w1), b)
+      val b = f (0w1 = ((w >> 0w7) andb 0w1), b)
+    in
+      b
+    end
+
+
+  fun iterateAtMost8ElemsInRange (w, count) b f =
+    let
+      open Word8
+      infix 2 >> andb
+      val op> = Int.>
+    in
+      if count > 8 then
+        raise Fail "SeqBasis.iterateAtMost8ElemsInRange: more than 8 elems"
+      else
+        Util.loop (0, count) b (fn (b, k) =>
+          f (0w1 = ((w >> Word.fromInt k) andb 0w1), b)
+        )
+    end
+
+
+  fun writeFlagsFilter grain (lo, hi) (f: int -> 'a) (g: int -> bool) =
+    let
+      val n = hi - lo
+
+      (** round up block size to multiple of 8 *)
+      val blockSize = 8 * (Util.ceilDiv grain 8)
+      val numBlocks = Util.ceilDiv n blockSize
+      val numFlags = Util.ceilDiv n 8
+      val packedFlags = allocate numFlags
+
+      fun packFlagsForBlock b =
+        let
+          val start = lo + b * blockSize
+          val stop = Int.min (start + blockSize, hi)
+
+          fun loop count idx =
+            if idx >= stop then
+              count
+            else if idx + 8 <= stop then
+              let
+                val (w, c) = pack8ElemsStartingAt idx g
+              in
+                upd packedFlags ((idx-lo) div 8) w;
+                loop (count+c) (idx+8)
+              end
+            else
+              let
+                val (w, c) = packAtMost8ElemsInRange (idx, stop) g
+              in
+                upd packedFlags ((idx-lo) div 8) w;
+                count+c
+              end
+        in
+          loop 0 start
+        end
+
+      val blockCounts = tabulate 1 (0, numBlocks) packFlagsForBlock
+      val offsets = scan grain op+ 0 (0, numBlocks) (nth blockCounts)
+      val total = nth offsets numBlocks
+      val output = allocate total
+
+      fun outputBlock b =
+        let
+          val start = lo + b * blockSize
+          val stop = Int.min (start + blockSize, hi)
+
+          fun loop count idx =
+            if idx >= stop then
+              count
+            else if idx + 8 <= stop then
+              let
+                val flags = nth packedFlags (idx div 8)
+                val = iterate8Flags flags count (fn (flag, off) =>
+                  if flag then
+                    ( upd output
+              in
+              end
+            else
+              let
+              in
+              end
+
+        in
+        end
+    in
+    end
+*)
+
 end

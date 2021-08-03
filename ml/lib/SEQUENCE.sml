@@ -25,6 +25,7 @@ sig
   val flatten: 'a seq seq -> 'a seq
 
   val map: ('a -> 'b) -> 'a seq -> 'b seq
+  val mapOption: ('a -> 'b option) -> 'a seq -> 'b seq
   val zip: 'a seq * 'b seq -> ('a * 'b) seq
   val zipWith: ('a * 'b -> 'c) -> 'a seq * 'b seq -> 'c seq
   val zipWith3: ('a * 'b * 'c -> 'd) -> 'a seq * 'b seq * 'c seq -> 'd seq

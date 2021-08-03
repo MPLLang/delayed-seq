@@ -150,6 +150,10 @@ struct
     AS.full (SeqBasis.filter GRAN (0, length s) (nth s) (fn i => p (i, nth s i)))
 
 
+  fun mapOption f s =
+    AS.full (SeqBasis.tabFilter GRAN (0, length s) (f o nth s))
+
+
   fun equal eq (s, t) =
     length s = length t andalso
     SeqBasis.reduce GRAN (fn (a, b) => a andalso b) true (0, length s)

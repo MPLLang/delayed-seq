@@ -2,8 +2,7 @@ structure SerialBFS =
 struct
 
   structure Seq = ArraySequence
-
-  structure G = Ligra(Int)
+  structure G = AdjacencyGraph(Int)
 
   fun bfs g s =
     let
@@ -13,7 +12,7 @@ struct
       val n = G.numVertices g
       val m = G.numEdges g
 
-      val queue = Primitives.alloc (m+1)
+      val queue = ForkJoin.alloc (m+1)
       val parents = Array.array (n, ~1)
 
       fun search (lo, hi) =
