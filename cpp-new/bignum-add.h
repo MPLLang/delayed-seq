@@ -10,7 +10,6 @@ using byte = unsigned char;
 // i.e. think of as radix 128 integer representation
 using bignum = parlay::sequence<byte>;
 
-/*
 auto big_add_delayed(bignum const& A, bignum const &B) {
   timer t("add");
   size_t n = A.size();
@@ -26,7 +25,6 @@ auto big_add_delayed(bignum const& A, bignum const &B) {
   t.next("force");
   return std::pair(r, (final >> 7));
 }
-*/
 
 auto big_add_strict(bignum const& A, bignum const &B) {
   timer t("add");
