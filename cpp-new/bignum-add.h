@@ -13,11 +13,11 @@ using bignum = parlay::sequence<byte>;
 auto big_add_delayed(bignum const& A, bignum const &B) {
   timer t("add");
   size_t n = A.size();
-  auto sums = parlay::delayed_seq<byte>(n, [&] (size_t i) {
+  auto sums = parlay::delayed_seq<byte>(n, [&] (size_t i) -> byte {
       return A[i] + B[i];});
-  auto f = [] (byte a, byte b) { // carry propagate
+  auto f = [] (byte a, byte b) ->byte { // carry propagate
     return (b == 127) ? a : b;};
-  auto [carries, final] = parlay::block_delayed::scan(sums, parlay::make_monoid(f,0));
+  auto [carries, final] = parlay::block_delayed::scan(sums, parlay::make_monoid(f,(byte)0));
   t.next("scan");
   auto z = parlay::block_delayed::zip(carries, sums);
   auto mr = parlay::block_delayed::map(z, [] (auto x) {return ((x.first >> 7) + x.second) & 127;});
