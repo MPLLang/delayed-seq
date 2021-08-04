@@ -4,3 +4,6 @@
 [submodule "cpp/pbbsbench"]
 	path = cpp/pbbsbench
 	url = https://github.com/cmuparlay/pbbsbench.git
+[submodule "cpp-new/pbbsbench"]
+	path = cpp-new/pbbsbench
+	url = https://github.com/cmuparlay/pbbsbench

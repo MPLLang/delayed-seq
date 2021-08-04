@@ -9,7 +9,7 @@ JEMALLOC = -L$(JEMALLOCLD) -ljemalloc
 endif
 
 CILK_COMMON_PREFIX=-fcilkplus -lcilkrts -DCILK -ldl -DPARLAY_CILK
-HOMEGROWN_COMMON_PREFIX=-DPARLAY_HOMEGROWN -DHOMEGROWN -pthread
+HOMEGROWN_COMMON_PREFIX=-pthread
 SCHEDULER_COMMON_PREFIX=$(HOMEGROWN_COMMON_PREFIX)
 
 ifdef USE_HWLOC
@@ -18,9 +18,9 @@ endif
 
 INCLUDE_FILES=\
 	$(wildcard *.hpp *.h)
-INCLUDE_DIRECTIVES=
+INCLUDE_DIRECTIVES=-Ipbbsbench/parlaylib/include
 
-WARNINGS_PREFIX=-Wno-subobject-linkage -Wno-overflow
+WARNINGS_PREFIX=-Wno-subobject-linkage -Wno-overflow -Wfatal-errors
 COMMON_PREFIX=-std=c++17 -mcx16 $(WARNINGS_PREFIX) $(HWLOC_PREFIX)
 
 OPT_PREFIX=-O3 -march=native -DNDEBUG $(COMMON_PREFIX)
@@ -62,6 +62,8 @@ install_folder:
 
 
 PROGRAMS=\
+	bfs.array \
+	bfs.delay \
 	mcss.array \
 	mcss.delay \
 	bignum-add.array \
@@ -80,6 +82,7 @@ PROGRAMS=\
 	primes.delay \
 	quickhull.array \
 	quickhull.delay \
+	raycast.delay \
 	spmv.array \
 	spmv.delay \
 	tokens.array \

@@ -43,7 +43,7 @@ void initialize_hwloc(int nb_workers, bool numa_alloc_interleaved = true) {
 /*---------------------------------------------------------------------*/
 /* Benchmark initialization */
 
-void setProc(int);
+// void setProc(int);
 // void warmup(int);
 
 /* The initialize function is guaranteed by GCC to be called by the
@@ -54,7 +54,7 @@ __attribute__((constructor))
 void initialize(int argc, char **argv) {
   deepsea::cmdline::set(argc, argv);
   unsigned nb_proc = deepsea::cmdline::parse_or_default_int("proc", 1);
-  setProc(nb_proc);
+  //setProc(nb_proc);
   { // change numa page allocation policy to round robin, if hwloc is enabled
     // and numa_alloc_interleaved==true
     bool numa_alloc_interleaved = (nb_proc == 1) ? false : true;
