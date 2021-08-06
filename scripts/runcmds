@@ -101,8 +101,17 @@ if __name__ == "__main__":
       jobs = max(4, NCPU/2)
       cmd = "make -C {} -j {} ".format(place, jobs) + (" ".join(binsToMakeHere))
       sys.stderr.write("[INFO] " + cmd + "\n")
-      out = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-      sys.stderr.write(out + "\n")
+
+      output = None
+      shouldQuit = False
+      try:
+        output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+      except subprocess.CalledProcessError as e:
+        output = e.output
+        shouldQuit = True
+      sys.stderr.write(output + "\n")
+      if shouldQuit:
+        sys.exit(1)
 
   for result in runcmds(rows, repeat=args.repeat, timeout=args.timeout, silent=args.silent):
     s = '{}\n'.format(json.dumps(result))

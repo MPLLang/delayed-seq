@@ -28,12 +28,6 @@
         "args": ["-n 500000000"]
       },
       {
-        "tag": ["mcss-prefixes"],
-        "bench": ["mcss-prefixes"],
-        "impl": ["array", "delay"],
-        "args": ["-n 500000000"]
-      },
-      {
         "tag": ["bignum-add"],
         "bench": ["bignum-add"],
         "impl": ["array", "delay"],
