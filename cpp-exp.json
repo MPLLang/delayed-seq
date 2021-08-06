@@ -15,7 +15,7 @@
     {
       "procs": ["1", "10", "20", "30", "40", "50", "60", "72"],
       "config": ["cpp"],
-      "cwd": ["cpp"],
+      "cwd": ["cpp-new"],
       "args1": ["-repeat 10 -warmup 3"]
     },
 
@@ -104,6 +104,12 @@
         "bench": ["grep"],
         "impl": ["array", "delay"],
         "args": ["-pattern ee -infile /usr0/home/swestric/proj/delayed-seq/inputs/sources4.txt"]
+      },
+      {
+        "tag": ["bfs"],
+        "bench": ["bfs"],
+        "impl": ["array", "delay"],
+        "args": ["-infile /usr0/home/swestric/data/graph/adj/rmat-10M-symm -source 0"]
       }
     ]
 }

@@ -10,7 +10,7 @@
   "globals":
     {
       "procs": ["1", "72"],
-      "config": ["mpl-cc-space"],
+      "config": ["mpl-latest-space"],
       "cwd": ["ml"],
       "args1": ["-repeat 1 -warmup 0"]
     },
@@ -84,6 +84,12 @@
         "args": ["-n 500000000"]
       },
       {
+        "tag": ["tokens-two-scan"],
+        "bench": ["tokens-two-scan"],
+        "impl": ["array", "delay"],
+        "args": ["-n 500000000"]
+      },
+      {
         "tag": ["linearrec"],
         "bench": ["linearrec"],
         "impl": ["array", "delay"],
@@ -100,6 +106,12 @@
         "bench": ["grep"],
         "impl": ["array", "delay"],
         "args": ["-pattern ee -infile /usr0/home/swestric/proj/delayed-seq/inputs/sources4.txt"]
+      },
+      {
+        "tag": ["bfs"],
+        "bench": ["bfs"],
+        "impl": ["array", "delay"],
+        "args": ["-infile /usr0/home/swestric/data/graph/adj/rmat-10M-symm-bin -source 0"]
       }
     ]
 }
