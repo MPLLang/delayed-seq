@@ -91,8 +91,15 @@ renameConfig = {
   'mpl-cc': 'mpl-cc',
   'cpp': 'cpp',
   'mpl-cc-space': 'mpl-cc-space',
-  'cpp-space': 'cpp-space'
+  'cpp-space': 'cpp-space',
+  'mpl-latest': 'mpl-cc',
+  'mpl-latest-space': 'mpl-cc-space'
 }
+
+def renameTag(t):
+  if t == "tokens-two-scan":
+    return "tokens"
+  return t
 
 foundTags = set()
 foundProcs = set()
@@ -105,6 +112,7 @@ def parseStats(row):
       safeInsert(newRow, name, convert(m.group(1)))
   newRow['procs'] = int(newRow.get('procs', '1'))
   newRow['config'] = renameConfig[row['config']]
+  newRow['tag'] = renameTag(row['tag'])
 
   tms = parseExectimes(newRow['stdout'] + newRow['stderr'])
   tms = tms[-10:]
@@ -387,6 +395,11 @@ P = sorted(list(foundProcs))
 maxp = max(foundProcs)
 
 orderedTags = sorted(list(foundTags))
+
+def keepTag(t):
+  return (t != "filter") and (t != "parens")
+
+orderedTags = [ t for t in orderedTags if keepTag(t) ]
 
 def implsOfTag(t):
   result = set()

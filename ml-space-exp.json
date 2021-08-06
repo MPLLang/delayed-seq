@@ -3,7 +3,7 @@
     [
       {
         "match": {},
-        "template": "/usr/bin/time -v bin/<bench>.<impl>.mpl-cc-space.bin @mpl <procs?procs {}> set-affinity -- <args?{} ><args1?{}>"
+        "template": "/usr/bin/time -v bin/<bench>.<impl>.<config>.bin @mpl <procs?procs {}> set-affinity -- <args?{} ><args1?{}>"
       }
     ],
 
