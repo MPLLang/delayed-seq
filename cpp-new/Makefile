@@ -62,6 +62,8 @@ install_folder:
 
 
 PROGRAMS=\
+	bestcut.array \
+	bestcut.delay \
 	bfs.array \
 	bfs.delay \
 	mcss.array \
