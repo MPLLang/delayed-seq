@@ -5,9 +5,9 @@
 
 #include "pbbsbench/common/graphIO.h"
 #include "pbbsbench/breadthFirstSearch/bench/BFS.h"
-#include "pbbsbench/breadthFirstSearch/ndBFS/BFS.C"
+#include "pbbsbench/breadthFirstSearch/simpleBFS/BFS.C"
 
-parlay::sequence<vertexId> BFSNoDelay(vertexId start, const Graph &G, 
+parlay::sequence<vertexId> BFSRAD(vertexId start, const Graph &G, 
 			       bool verbose = false) {
   size_t n = G.numVertices();
   auto parent = parlay::sequence<std::atomic<vertexId>>::from_function(n, [&] (size_t i) {
@@ -19,7 +19,7 @@ parlay::sequence<vertexId> BFSNoDelay(vertexId start, const Graph &G,
 
     // get out edges of the frontier and flatten
     auto nested_edges = parlay::map(frontier, [&] (vertexId u) {
-      return parlay::tabulate(G[u].degree, [&, u] (size_t i) {
+      return parlay::delayed_tabulate(G[u].degree, [&, u] (size_t i) {
         return std::pair(u, G[u].Neighbors[i]);});});
     auto edges = parlay::flatten(nested_edges);
 
@@ -45,14 +45,15 @@ int main(int argc, char** argv) {
   Graph G = readGraphFromFile<vertexId,edgeId>(const_cast<char*>(infile.c_str()));
   G.addDegrees();
 
-  parlay::sequence<vertexId> result;
-  pbbsBench::launch([&] {
-    result = BFSNoDelay(source, G);
+  sequence<vertexId> result;
+  pbbsBench::launch([&] { 
+    result = BFSRAD(source, G);
   });
 
   long numVisited = 0;
   for (long i = 0; i < result.size(); i++) {
     if (result[i] != -1) numVisited++;
   }
+
   std::cout << "visited " << numVisited << std::endl;
 }

@@ -67,6 +67,7 @@ PROGRAMS=\
 	bestcut.rad \
 	bfs.array \
 	bfs.delay \
+	bfs.rad \
 	mcss.array \
 	mcss.delay \
 	bignum-add.array \
