@@ -1,0 +1,2 @@
+structure BC = MkBestCut (DelayedSeq)
+
