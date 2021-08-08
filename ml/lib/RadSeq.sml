@@ -46,4 +46,84 @@ struct
       Flat (Full (AS.full result))
     end
 
+
+  fun scanDelay' g b (lo, hi, f) =
+    let
+      val n = hi-lo
+      val nb = numBlocks n
+
+      val blockSums =
+        SeqBasis.tabulate 1 (0, nb) (fn blockIdx =>
+          let
+            val blockStart = lo + blockIdx*blockSize
+            val blockEnd = Int.min (hi, blockStart + blockSize)
+          in
+            SeqBasis.foldl g b (blockStart, blockEnd) f
+          end)
+
+      val partials =
+        SeqBasis.scan gran g b (0, nb) (A.nth blockSums)
+
+      val result = alloc (n+1)
+    in
+      parfor 1 (0, nb) (fn i =>
+        let
+          val blockStart = i*blockSize
+          val blockEnd = Int.min (n, blockStart + blockSize)
+          val size = blockEnd-blockStart
+
+          fun loop j b =
+            if j >= size then ()
+            else ( A.update (result, blockStart+j, b)
+                 ; loop (j+1) (g (b, f (lo+blockStart+j)))
+                 )
+        in
+          loop 0 (A.nth partials i)
+        end);
+
+      A.update (result, n, A.nth partials nb);
+      ArraySlice.full result
+    end
+
+
+  fun scanDelay g b (s as (lo,hi,_)) =
+    let
+      (* val _ = print ("RadSeq.scanDelay...\n") *)
+      val n = hi-lo
+      val p = scanDelay' g b s
+      val t = ArraySequence.nth p n
+      val p = ArraySequence.subseq p (0, n)
+      (* val _ = print ("RadSeq.scanDelay okay\n") *)
+    in
+      (Flat (Full p), t)
+    end
+
+  fun scanDelayIncl g b (s as (lo,hi,_)) =
+    let
+      (* val _ = print ("RadSeq.scanDelayIncl...\n") *)
+      val n = hi-lo
+      val p = scanDelay' g b s
+      (* val _ = print ("RadSeq.scanDelay' okay\n") *)
+      val p = ArraySequence.subseq p (1, n)
+      (* val _ = print ("RadSeq.scanDelayIncl okay\n") *)
+    in
+      Flat (Full p)
+    end
+
+  fun scan (g: 'a * 'a -> 'a) (b: 'a) (s: 'a seq): ('a seq * 'a) =
+    case s of
+      Flat (Full slice) =>
+        scanDelay g b (0, AS.length slice, AS.nth slice)
+    | Flat (Delay (i, j, f)) =>
+        scanDelay g b (i, j, f)
+    | _ => scan g b (force s)
+
+  fun scanIncl (g: 'a * 'a -> 'a) (b: 'a) (s: 'a seq): 'a seq =
+    case s of
+      Flat (Full slice) =>
+        scanDelayIncl g b (0, AS.length slice, AS.nth slice)
+    | Flat (Delay (i, j, f)) =>
+        scanDelayIncl g b (i, j, f)
+    | _ => scanIncl g b (force s)
+
 end
