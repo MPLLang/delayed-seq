@@ -14,6 +14,7 @@ in
   structure ArraySequence
 end
 DelayedSeq.sml
+RadSeq.sml
 FuncSequence.sml
 BinarySearch.sml
 Merge.sml
