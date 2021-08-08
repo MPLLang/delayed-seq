@@ -104,6 +104,12 @@
         "bench": ["bfs"],
         "impl": ["array", "delay"],
         "args": ["-infile /usr0/home/swestric/data/graph/adj/rmat-10M-symm -source 0"]
+      },
+      {
+        "tag": ["bestcut"],
+        "bench": ["bestcut"],
+        "impl": ["array", "rad", "delay"],
+        "args": ["-n 200000000"]
       }
     ]
 }
