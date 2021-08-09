@@ -104,7 +104,7 @@
       {
         "tag": ["bfs"],
         "bench": ["bfs"],
-        "impl": ["array", "delay"],
+        "impl": ["array", "rad", "delay"],
         "args": ["-infile /usr0/home/swestric/data/graph/adj/rmat-10M-symm-bin -source 0"]
       },
       {

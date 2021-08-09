@@ -513,11 +513,17 @@ def arrayTime(config, tag, procs):
 def delayTime(config, tag, procs):
   return tm(averageTime(D, config, tag, 'delay', procs))
 
+def radTime(config, tag, procs):
+  return tm(averageTime(D, config, tag, 'rad', procs))
+
 def arraySpace(config, tag, procs):
   return spg(averageSpace(D, config, tag, 'array', procs))
 
 def delaySpace(config, tag, procs):
   return spg(averageSpace(D, config, tag, 'delay', procs))
+
+def radSpace(config, tag, procs):
+  return spg(averageSpace(D, config, tag, 'rad', procs))
 
 def arrayVsDelayTime(config, tag, procs):
   arrt = tm(averageTime(D, config, tag, 'array', procs))
@@ -525,10 +531,22 @@ def arrayVsDelayTime(config, tag, procs):
   frac = sd(arrt, delt)
   return rat(frac)
 
+def radVsDelayTime(config, tag, procs):
+  radt = tm(averageTime(D, config, tag, 'rad', procs))
+  delt = tm(averageTime(D, config, tag, 'delay', procs))
+  frac = sd(radt, delt)
+  return rat(frac)
+
 def arrayVsDelaySpace(config, tag, procs):
   arrr = spg(averageSpace(D, config, tag, 'array', procs))
   delr = spg(averageSpace(D, config, tag, 'delay', procs))
   frac = sd(arrr, delr)
+  return rat(frac)
+
+def radVsDelaySpace(config, tag, procs):
+  radr = spg(averageSpace(D, config, tag, 'rad', procs))
+  delr = spg(averageSpace(D, config, tag, 'delay', procs))
+  frac = sd(radr, delr)
   return rat(frac)
 
 header1 = ["Benchmark", "MPL(1)", "MPL({})".format(maxp), "C++(1)", "C++({})".format(maxp)]
@@ -622,6 +640,61 @@ with open(cppTable, 'w') as output:
     output.write(" & ".join([tag] + row))
     output.write("  \\\\\n")
 print("[INFO] wrote to {}".format(cppTable))
+
+##############################################################################
+## RAD
+
+radtags = ['bestcut','bfs']
+
+mplTable = "figures/rad-mpl.tex"
+with open(mplTable, 'w') as output:
+  for tag in radtags:
+
+    row = \
+      [ fmt(radTime('mpl-cc', tag, 1))
+      , fmt(delayTime('mpl-cc', tag, 1))
+      , fmtRatio(radVsDelayTime('mpl-cc', tag, 1))
+      , fmt(radTime('mpl-cc', tag, maxp))
+      , fmt(delayTime('mpl-cc', tag, maxp))
+      , fmtRatio(radVsDelayTime('mpl-cc', tag, maxp))
+      , sfmt(radSpace('mpl-cc-space', tag, 1))
+      , sfmt(delaySpace('mpl-cc-space', tag, 1))
+      , fmtRatio(radVsDelaySpace('mpl-cc-space', tag, 1))
+      , sfmt(radSpace('mpl-cc-space', tag, maxp))
+      , sfmt(delaySpace('mpl-cc-space', tag, maxp))
+      , fmtRatio(radVsDelaySpace('mpl-cc-space', tag, maxp))
+      ]
+
+    row = [x if x is not None else "--" for x in row]
+    output.write(" & ".join([tag] + row))
+    output.write("  \\\\\n")
+print("[INFO] wrote to {}".format(mplTable))
+
+cppTable = "figures/rad-cpp.tex"
+with open(cppTable, 'w') as output:
+  for tag in radtags:
+
+    row = \
+      [ fmt(radTime('cpp', tag, 1))
+      , fmt(delayTime('cpp', tag, 1))
+      , fmtRatio(radVsDelayTime('cpp', tag, 1))
+      , fmt(radTime('cpp', tag, maxp))
+      , fmt(delayTime('cpp', tag, maxp))
+      , fmtRatio(radVsDelayTime('cpp', tag, maxp))
+      , sfmt(radSpace('cpp-space', tag, 1))
+      , sfmt(delaySpace('cpp-space', tag, 1))
+      , fmtRatio(radVsDelaySpace('cpp-space', tag, 1))
+      , sfmt(radSpace('cpp-space', tag, maxp))
+      , sfmt(delaySpace('cpp-space', tag, maxp))
+      , fmtRatio(radVsDelaySpace('cpp-space', tag, maxp))
+      ]
+
+    row = [x if x is not None else "--" for x in row]
+    output.write(" & ".join([tag] + row))
+    output.write("  \\\\\n")
+print("[INFO] wrote to {}".format(cppTable))
+
+#############################################################################
 
 
 # mplSpaceTable = "figures/mpl-space.tex"
