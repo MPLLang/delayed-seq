@@ -18,6 +18,22 @@ void linear_rec_delayed(parlay::sequence<std::pair<double,double>> const& A) {
   t.next("force");
 }
 
+/* Is there a rad-only version that is worth benchmarking? -- MR
+void linear_rec_rad(parlay::sequence<std::pair<double,double>> const& A) {
+  using dpair = std::pair<double,double>;
+  timer t("lr");
+  auto f = [] (dpair l, dpair r) {
+    return dpair(l.first*r.first,l.second*r.first+r.second);};
+  auto m = parlay::make_monoid(f,dpair(1.0,0.0));
+  auto recs = parlay::scan_inclusive(A, m);
+  t.next("delayed scan");
+  auto diffs = parlay::block_delayed::map(recs, [] (dpair x) -> long {return x.second;});
+  t.next("delayed map");
+  auto r = parlay::block_delayed::force(diffs);
+  t.next("force");
+}
+*/
+
 void linear_rec_strict(parlay::sequence<std::pair<double,double>> const& A) {
   using dpair = std::pair<double,double>;
   timer t("lr");

@@ -94,6 +94,7 @@ PROGRAMS=\
 	wc.array \
 	wc.delay \
 	grep.array \
+	grep.rad \
 	grep.delay
 
 all_cpp: $(PROGRAMS:%=%.cpp.bin)

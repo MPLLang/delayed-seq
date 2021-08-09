@@ -25,6 +25,27 @@ auto grep_delayed(parlay::sequence<char> const& str,
   return r;
 }
 
+auto grep_rad(parlay::sequence<char> const& str,
+	      parlay::sequence<char> const& search_str) {
+  timer t("grep");
+  size_t n = str.size();
+  auto line_break = [] (char c) {return c == '\n';};
+  auto idx = parlay::filter(parlay::iota(n), [&] (size_t i) -> long {
+      return line_break(str[i]);});
+  t.next("filter");
+  size_t m = idx.size();
+  //cout << m << endl;
+  auto y = parlay::delayed_tabulate(m+1, [&] (size_t i) {
+      size_t start = (i==0 ? 0 : idx[i-1]);
+      size_t end = (i==m ? n : idx[i]);
+      return parlay::make_slice(str.begin()+start,str.begin()+end);
+    });
+  auto r = parlay::filter(y, [&] (auto x) {
+      return parlay::search(x, search_str) != x.end();});
+  t.next("filter 2");
+  return r;
+}
+
 auto grep_strict(parlay::sequence<char> const& str,
 		 parlay::sequence<char> const& search_str) {
   timer t("grep");
