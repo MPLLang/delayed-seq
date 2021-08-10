@@ -870,6 +870,10 @@ struct
         zipWithBothFlat g (0, AS.length slice, AS.nth slice) yy
     | (Flat (Delay xx), Flat (Full slice)) =>
         zipWithBothFlat g xx (0, AS.length slice, AS.nth slice)
+    | (Flat (Full slice1), Flat (Full slice2)) =>
+        zipWithBothFlat g
+          (0, AS.length slice1, AS.nth slice1)
+          (0, AS.length slice2, AS.nth slice2)
     | (Nest xx, Flat (Full slice)) =>
         zipWithOneNest g xx (0, AS.length slice, AS.nth slice)
     | (Nest xx, Flat (Delay yy)) =>
