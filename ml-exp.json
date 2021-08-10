@@ -40,12 +40,6 @@
         "args": ["-n 500000000"]
       },
       {
-        "tag": ["parens"],
-        "bench": ["parens"],
-        "impl": ["array", "delay"],
-        "args": ["-n 1000000000"]
-      },
-      {
         "tag": ["linefit"],
         "bench": ["linefit"],
         "impl": ["array", "delay"],
@@ -68,18 +62,6 @@
         "bench": ["sparse-mxv"],
         "impl": ["array", "delay"],
         "args": ["-n 200000000"]
-      },
-      {
-        "tag": ["filter"],
-        "bench": ["filter"],
-        "impl": ["array", "delay"],
-        "args": ["-n 500000000"]
-      },
-      {
-        "tag": ["tokens"],
-        "bench": ["tokens"],
-        "impl": ["array", "delay"],
-        "args": ["-n 500000000"]
       },
       {
         "tag": ["tokens-two-scan"],
