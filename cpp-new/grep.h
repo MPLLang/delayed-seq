@@ -19,7 +19,7 @@ auto grep_delayed(parlay::sequence<char> const& str,
       size_t end = (i==m ? n : idx[i]);
       return parlay::make_slice(str.begin()+start,str.begin()+end);
     });
-  auto r = parlay::block_delayed::filter(y, [&] (auto x) {
+  auto r = parlay::filter(y, [&] (auto x) {
       return parlay::search(x, search_str) != x.end();});
   t.next("filter 2");
   return r;
