@@ -30,13 +30,13 @@
       {
         "tag": ["primes"],
         "bench": ["primes"],
-        "impl": ["array", "delay"],
+        "impl": ["array", "rad", "delay"],
         "args": ["-n 100000000"]
       },
       {
         "tag": ["bignum-add"],
         "bench": ["bignum-add"],
-        "impl": ["array", "delay"],
+        "impl": ["array", "rad", "delay"],
         "args": ["-n 500000000"]
       },
       {
@@ -66,7 +66,7 @@
       {
         "tag": ["tokens-two-scan"],
         "bench": ["tokens-two-scan"],
-        "impl": ["array", "delay"],
+        "impl": ["array", "rad", "delay"],
         "args": ["-n 500000000"]
       },
       {
@@ -84,7 +84,7 @@
       {
         "tag": ["grep"],
         "bench": ["grep"],
-        "impl": ["array", "delay"],
+        "impl": ["array", "rad", "delay"],
         "args": ["-pattern ee -infile /usr0/home/swestric/proj/delayed-seq/inputs/sources4.txt"]
       },
       {
