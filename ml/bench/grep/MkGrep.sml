@@ -75,12 +75,18 @@ struct
       fun makeLine (start, stop) = ASeq.subseq s (start, stop-start)
       fun containsPat (start, stop) =
         case ff (0, stop-start) (checkMatch pat (makeLine (start, stop))) of
-          NONE => false
-        | SOME _ => true
+          NONE => NONE
+        | SOME _ => SOME (start, stop)
 
       val s = Seq.fromArraySeq s
       val n = Seq.length s
+
       val idx = Seq.filter (isNewline o Seq.nth s) (Seq.tabulate (fn i => i) n)
+      (* val idx =
+        Seq.mapOption
+          (fn i => if isNewline (Seq.nth s i) then SOME i else NONE)
+          (Seq.tabulate (fn i => i) n) *)
+
       val m = Seq.length idx
 
       fun line i =
@@ -92,7 +98,8 @@ struct
         end
 
     in
-      Seq.toArraySeq (Seq.filter containsPat (Seq.tabulate line (m+1)))
+      (* Seq.toArraySeq (Seq.filter containsPat (Seq.tabulate line (m+1))) *)
+      Seq.toArraySeq (Seq.mapOption containsPat (Seq.tabulate line (m+1)))
     end
 
 end
