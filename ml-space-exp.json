@@ -10,7 +10,7 @@
   "globals":
     {
       "procs": ["1", "72"],
-      "config": ["mpl-latest-space"],
+      "config": ["mpl-v02-space"],
       "cwd": ["ml"],
       "args1": ["-repeat 1 -warmup 0"]
     },
