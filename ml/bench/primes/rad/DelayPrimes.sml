@@ -1,0 +1,1 @@
+structure DelayPrimes = MkPrimes (RadSeq)
