@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <cassert>
+
 #include "benchmark.hpp"
 
 parlay::sequence<long> primes_strict(long n) {
@@ -15,6 +16,23 @@ parlay::sequence<long> primes_strict(long n) {
   auto s = parlay::flatten(sieves);
   parlay::parallel_for(0, s.size(), [&] (size_t i) {
       flags[s[i]] = false; });
+  flags[0] = flags[1] = false;
+  return parlay::pack_index<long>(flags);
+}
+
+parlay::sequence<long> primes_rad(long n) {
+  if (n < 2) return parlay::sequence<long>();
+  long sq = std::sqrt(n); 
+  auto sqprimes = primes_rad(sq);
+  parlay::sequence flags(n+1, true);
+  auto sieves = parlay::map(sqprimes, [&] (long p) {
+      return parlay::delayed_tabulate(n/p - 1, [p] (long m) {
+	  return (m+2)*  p;});});
+  auto s = parlay::flatten(sieves);
+  parlay::parallel_for(0, s.size(), [&] (size_t i) {
+    assert(s[i] < flags.size());
+    flags[s[i]] = false;
+  });
   flags[0] = flags[1] = false;
   return parlay::pack_index<long>(flags);
 }

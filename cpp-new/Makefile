@@ -21,10 +21,10 @@ INCLUDE_FILES=\
 INCLUDE_DIRECTIVES=-Ipbbsbench/parlaylib/include
 
 WARNINGS_PREFIX=-Wno-subobject-linkage -Wno-overflow -Wfatal-errors
-COMMON_PREFIX=-std=c++17 -mcx16 $(WARNINGS_PREFIX) $(HWLOC_PREFIX)
+COMMON_PREFIX=-std=c++17 -mcx16 -pthread $(WARNINGS_PREFIX) $(HWLOC_PREFIX)
 
 OPT_PREFIX=-O3 -march=native -DNDEBUG $(COMMON_PREFIX)
-DBG_PREFIX=-O0 -g3 $(COMMON_PREFIX)
+DBG_PREFIX=-O0 -g -fsanitize=address,undefined $(COMMON_PREFIX)
 
 PARDBG_PREFIX=$(DBG_PREFIX) $(SCHEDULER_COMMON_PREFIX)
 SEQDBG_PREFIX=$(DBG_PREFIX)
@@ -72,6 +72,7 @@ PROGRAMS=\
 	mcss.delay \
 	bignum-add.array \
 	bignum-add.delay \
+	bignum-add.rad \
 	filter.array \
 	filter.delay \
 	integrate.array \
@@ -84,6 +85,7 @@ PROGRAMS=\
 	mcss-prefixes.delay \
 	primes.array \
 	primes.delay \
+	primes.rad \
 	quickhull.array \
 	quickhull.delay \
 	raycast.delay \
@@ -91,6 +93,7 @@ PROGRAMS=\
 	spmv.delay \
 	tokens.array \
 	tokens.delay \
+	tokens.rad \
 	wc.array \
 	wc.delay \
 	grep.array \
