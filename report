@@ -93,7 +93,9 @@ renameConfig = {
   'mpl-cc-space': 'mpl-cc-space',
   'cpp-space': 'cpp-space',
   'mpl-latest': 'mpl-cc',
-  'mpl-latest-space': 'mpl-cc-space'
+  'mpl-latest-space': 'mpl-cc-space',
+  'mpl-v02': 'mpl-cc',
+  'mpl-v02-space': 'mpl-cc-space'
 }
 
 def renameTag(t):
@@ -644,7 +646,7 @@ print("[INFO] wrote to {}".format(cppTable))
 ##############################################################################
 ## RAD
 
-radtags = ['bestcut','bfs']
+radtags = ['bestcut','bfs','bignum-add','primes','tokens']
 
 mplTable = "figures/rad-mpl.tex"
 with open(mplTable, 'w') as output:
