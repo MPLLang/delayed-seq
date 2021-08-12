@@ -30,7 +30,7 @@ std::tuple<size_t,size_t,size_t> wc(Seq const &s) {
 
 int main(int argc, char** argv) {
   size_t n = max((size_t)1, (size_t)deepsea::cmdline::parse_or_default_long("n", 100000000));
-  auto str = parlay::tabulate(n, [&] (size_t i) { return parlay::hash64(i) % 255; });
+  auto str = parlay::tabulate(n, [&] (size_t i) -> char { return parlay::hash64(i) % 255; });
   size_t lines, words, bytes;
   pbbsBench::launch([&] {
     tie(lines, words, bytes) = wc(str);
