@@ -30,7 +30,7 @@
       {
         "tag": ["bignum-add"],
         "bench": ["bignum-add"],
-        "impl": ["array", "delay"],
+        "impl": ["array", "rad", "delay"],
         "args": ["-n 500000000"]
       },
       {
@@ -54,7 +54,7 @@
       {
         "tag": ["primes"],
         "bench": ["primes"],
-        "impl": ["array", "delay"],
+        "impl": ["array", "rad", "delay"],
         "args": ["-n 100000000"]
       },
       {
@@ -72,7 +72,7 @@
       {
         "tag": ["tokens"],
         "bench": ["tokens"],
-        "impl": ["array", "delay"],
+        "impl": ["array", "rad", "delay"],
         "args": ["-n 500000000"]
       },
       {
