@@ -5,4 +5,5 @@ ROOT=$(git rev-parse --show-toplevel)
 git submodule update --init --recursive
 echo "[INFO] submodules initialized"
 
+echo "[INFO] installing mpl (may appear unresponsive but is just taking a while)"
 $ROOT/scripts/install_mpls
