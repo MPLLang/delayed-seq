@@ -587,6 +587,9 @@ print("")
 
 # ===========================================================================
 
+radtags = ['bestcut','bfs','bignum-add','primes','tokens']
+nonradtags = [x for x in orderedTags if x not in radtags]
+
 def fmtRatio(frac):
   if frac is None:
     return "--"
@@ -597,7 +600,7 @@ def fmtRatio(frac):
 
 mplTable = "figures/all-mpl.tex"
 with open(mplTable, 'w') as output:
-  for tag in orderedTags:
+  for tag in nonradtags:
 
     row = \
       [ fmt(arrayTime('mpl-cc', tag, 1))
@@ -617,11 +620,12 @@ with open(mplTable, 'w') as output:
     row = [x if x is not None else "--" for x in row]
     output.write(" & ".join([tag] + row))
     output.write("  \\\\\n")
+  output.write("\midrule\n")
 print("[INFO] wrote to {}".format(mplTable))
 
 cppTable = "figures/all-cpp.tex"
 with open(cppTable, 'w') as output:
-  for tag in orderedTags:
+  for tag in nonradtags:
 
     row = \
       [ fmt(arrayTime('cpp', tag, 1))
@@ -646,22 +650,24 @@ print("[INFO] wrote to {}".format(cppTable))
 ##############################################################################
 ## RAD
 
-radtags = ['bestcut','bfs','bignum-add','primes','tokens']
-
 mplTable = "figures/rad-mpl.tex"
 with open(mplTable, 'w') as output:
   for tag in radtags:
 
     row = \
-      [ fmt(radTime('mpl-cc', tag, 1))
+      [ fmt(arrayTime('mpl-cc', tag, 1))
+      , fmt(radTime('mpl-cc', tag, 1))
       , fmt(delayTime('mpl-cc', tag, 1))
       , fmtRatio(radVsDelayTime('mpl-cc', tag, 1))
+      , fmt(arrayTime('mpl-cc', tag, maxp))
       , fmt(radTime('mpl-cc', tag, maxp))
       , fmt(delayTime('mpl-cc', tag, maxp))
       , fmtRatio(radVsDelayTime('mpl-cc', tag, maxp))
+      , sfmt(arraySpace('mpl-cc-space', tag, 1))
       , sfmt(radSpace('mpl-cc-space', tag, 1))
       , sfmt(delaySpace('mpl-cc-space', tag, 1))
       , fmtRatio(radVsDelaySpace('mpl-cc-space', tag, 1))
+      , sfmt(arraySpace('mpl-cc-space', tag, maxp))
       , sfmt(radSpace('mpl-cc-space', tag, maxp))
       , sfmt(delaySpace('mpl-cc-space', tag, maxp))
       , fmtRatio(radVsDelaySpace('mpl-cc-space', tag, maxp))
@@ -670,6 +676,7 @@ with open(mplTable, 'w') as output:
     row = [x if x is not None else "--" for x in row]
     output.write(" & ".join([tag] + row))
     output.write("  \\\\\n")
+  output.write("\midrule\n")
 print("[INFO] wrote to {}".format(mplTable))
 
 cppTable = "figures/rad-cpp.tex"
@@ -677,15 +684,19 @@ with open(cppTable, 'w') as output:
   for tag in radtags:
 
     row = \
-      [ fmt(radTime('cpp', tag, 1))
+      [ fmt(arrayTime('cpp', tag, 1))
+      , fmt(radTime('cpp', tag, 1))
       , fmt(delayTime('cpp', tag, 1))
       , fmtRatio(radVsDelayTime('cpp', tag, 1))
+      , fmt(arrayTime('cpp', tag, maxp))
       , fmt(radTime('cpp', tag, maxp))
       , fmt(delayTime('cpp', tag, maxp))
       , fmtRatio(radVsDelayTime('cpp', tag, maxp))
+      , sfmt(arraySpace('cpp-space', tag, 1))
       , sfmt(radSpace('cpp-space', tag, 1))
       , sfmt(delaySpace('cpp-space', tag, 1))
       , fmtRatio(radVsDelaySpace('cpp-space', tag, 1))
+      , sfmt(arraySpace('cpp-space', tag, maxp))
       , sfmt(radSpace('cpp-space', tag, maxp))
       , sfmt(delaySpace('cpp-space', tag, maxp))
       , fmtRatio(radVsDelaySpace('cpp-space', tag, maxp))
@@ -753,7 +764,7 @@ for config in ["mpl-cc", "cpp"]:
   for tag in orderedTags:
     outputName = 'figures/{}-{}-speedups.pdf'.format(config, tag)
     try:
-      theseImpls = ["delay", "array"]
+      theseImpls = ["delay", "array"] + (["rad"] if tag in radtags else [])
 
       plt.figure(figsize=(7,7))
       # markers = ['o','v','^','<','>','s','*','d','D','+','x','|','','','','','']
