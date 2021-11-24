@@ -19,4 +19,5 @@ cd cpp-new/pbbsbench/testData/geometryData \
 && ./randPoints -s 20000000 $DIR/inputs/uniform-circle-20M
 
 cd $DIR/inputs
+cat sources.txt.part* > sources.txt
 cat sources.txt sources.txt sources.txt sources.txt > sources4.txt
