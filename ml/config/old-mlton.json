@@ -1,0 +1,5 @@
+{
+  "compiler": "/usr/bin/mlton",
+  "flags": [],
+  "compat": "old-mlton"
+}
