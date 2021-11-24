@@ -1,0 +1,11 @@
+#!/bin/bash
+
+mkdir -p inputs \
+ && cd cpp-new/pbbsbench/testData/graphData \
+ && make rMatGraph edgeArrayToAdj \
+ && ./rMatGraph 10000000 rmat-10M-edgearray \
+ && ./edgeArrayToAdj -o ../../../../inputs/rmat-10M-symm rmat-10M-edgearray \
+ && rm -f rmat-10M-edgearray \
+ && cd ../../../../ \
+ && make -C ml graphio.default.old-mlton.bin \
+ && ml/bin/graphio.default.old-mlton.bin inputs/rmat-10M-symm -outfile inputs/rmat-10M-symm-bin
