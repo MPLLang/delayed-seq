@@ -7,3 +7,7 @@ echo "[INFO] submodules initialized"
 
 echo "[INFO] installing mpl (may appear unresponsive but is just taking a while)"
 $ROOT/scripts/install_mpls
+
+mkdir -p figures
+mkdir -p results
+mkdir -p inputs

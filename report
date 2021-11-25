@@ -369,7 +369,7 @@ def table(rows, align=None):
 
 def mostRecentResultsFile(ws=False):
   files = os.listdir("results")
-  pattern = r'\d{6}-\d{6}'
+  pattern = r'\d{6}-\d{6}.*'
   if ws:
     pattern = r'ws-' + pattern
   # A bit of a hack. Filenames are ...YYMMDD-hhmmss, so lexicographic string
@@ -773,7 +773,8 @@ for config in ["mpl-cc", "cpp"]:
       linestyles = ['solid', 'dashed']
 
       # markers = ['.'] * len(speedupTags)
-      procs = [1,10,20,30,40,50,60,72]
+      # procs = [1,10,20,30,40,50,60,72]
+      procs = P
 
       fontSize = 30
       legendFontSize = 24
