@@ -16,6 +16,7 @@ $ sudo docker run -v $(pwd -P)/ARTIFACT-RESULTS:/ARTIFACT-RESULTS --privileged -
 Step 3. Small experiments (~5 minutes). Requires at least 6GB RAM and 8 cores.
 Run the following commands inside the container (the prompt inside the container
 is a '#').
+
 # ./run-small
 # ./report-small | tee /ARTIFACT-RESULTS/small-output
 # cp -r small/figures /ARTIFACT-RESULTS/small-figures
@@ -30,9 +31,26 @@ for more info. The speedup plots should show that the 'delay' version scales
 better than the 'array' and 'rad' versions.
 
 
-Step 4. Generate inputs for larger experiments (~2 minutes):
-$ ./generate-inputs
+Step 5. Generate inputs for full experiments (~2 minutes).
+
+# ./generate-inputs
 
 
 
-Step 5. Larger experiments (optional, XXX hours):
+Step 6. Full experiments from paper (XXX hours). Requires at least 100GB RAM
+and a large number of cores. (At least 32 cores is okay; 64 or more is
+preferable).
+
+The `run` script takes an argument `--procs <PROCLIST>` which is a
+comma-separated (no spaces) list of processor counts to consider. We recommend
+choosing a maximum number of processors corresponding to physical cores, to
+avoid complications with hyperthreading. We also recommend choosing a range
+of intermediate processor counts, to see informative speedup curves.
+
+For example, in the paper we used `--procs 1,10,20,30,40,50,60,72` on a
+machine with 72 physical cores. With 32 cores, we would recommend
+`--procs 1,10,20,32`. With 64 cores, we recommend `--procs 1,10,20,30,40,50,64`.
+
+# ./run --procs <PROCLIST>
+# ./report | tee /ARTIFACT-RESULTS/full-output
+# cp -r figures /ARTIFACT-RESULTS/full-figures
