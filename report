@@ -780,7 +780,7 @@ for config in ["mpl-cc", "cpp"]:
       legendFontSize = 24
       markerSize = 10
 
-      plt.plot(procs, procs, marker="", color="grey", linewidth=0.5)
+      plt.plot([1,70], [1,70], marker="", color="grey", linewidth=0.5)
       lines = []
       for (i, impl) in enumerate(theseImpls):
         baseline = averageTime(D, config, tag, 'delay', 1)
