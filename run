@@ -11,15 +11,15 @@ RESULTS=$ROOT/results/$NOW
 rm -f $ROOT/cpp-new/bin/*.bin
 rm -f $ROOT/ml/bin/*.bin
 
-# all of the extra arguments get sent to scripts/runcmds.py with $@ below
+# extra args given to gencmds, e.g. to pass --procs ... at the commandline
 ( \
-  $GEN $ROOT/ml-exp.json; \
-  $GEN $ROOT/cpp-exp.json \
-) | $RUN --repeat 1 --compile --output $RESULTS $@
+  $GEN $@ $ROOT/ml-exp.json; \
+  $GEN $@ $ROOT/cpp-exp.json \
+) | $RUN --repeat 1 --compile --output $RESULTS
 
 ( \
-  $GEN $ROOT/ml-space-exp.json; \
-  $GEN $ROOT/cpp-space-exp.json \
-) | $RUN --repeat 10 --compile --output $RESULTS $@
+  $GEN $@ --procs_skip_middle $ROOT/ml-space-exp.json; \
+  $GEN $@ --procs_skip_middle $ROOT/cpp-space-exp.json \
+) | $RUN --repeat 10 --compile --output $RESULTS
 
 echo "[INFO] wrote results to $RESULTS"

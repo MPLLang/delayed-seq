@@ -13,7 +13,6 @@
 
   "globals":
     {
-      "procs": ["1", "72"],
       "config": ["cpp-space"],
       "cwd": ["cpp-new"],
       "args1": ["-repeat 1 -warmup 0"]

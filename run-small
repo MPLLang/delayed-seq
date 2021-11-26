@@ -11,10 +11,11 @@ RESULTS=$ROOT/small/results/$NOW
 rm -f $ROOT/cpp-new/bin/*.bin
 rm -f $ROOT/ml/bin/*.bin
 
-# all of the extra arguments get sent to scripts/runcmds.py with $@ below
+PROCLIST=1,4,8
+
 ( \
-  $GEN $ROOT/small/ml-exp.json; \
-  $GEN $ROOT/small/cpp-exp.json \
-) | $RUN --repeat 1 --compile --output $RESULTS $@
+  $GEN --procs $PROCLIST $ROOT/small/ml-exp.json; \
+  $GEN --procs $PROCLIST $ROOT/small/cpp-exp.json \
+) | $RUN --repeat 1 --compile --output $RESULTS
 
 echo "[INFO] wrote results to $RESULTS"
