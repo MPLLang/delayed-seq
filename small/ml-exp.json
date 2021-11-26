@@ -1,0 +1,49 @@
+{
+  "templates":
+    [
+      {
+        "match": { "config": "mpl" },
+        "template": "/usr/bin/time -v bin/<bench>.<impl>.<config>.bin @mpl <procs?procs {}> -- <args?{} ><args1?{}>"
+      },
+      {
+        "match": { "config": "mlton" },
+        "template": "/usr/bin/time -v bin/<bench>.<impl>.<config>.bin <args?{} ><args1?{}>"
+      }
+    ],
+
+  "globals":
+    {
+      "procs": ["1", "4", "8"],
+      "config": ["mpl-v02"],
+      "cwd": ["ml"],
+      "args1": ["-repeat 5 -warmup 2"]
+    },
+
+  "specs":
+    [
+      {
+        "tag": ["mcss"],
+        "bench": ["mcss"],
+        "impl": ["array", "delay"],
+        "args": ["-n 50000000"]
+      },
+      {
+        "tag": ["primes"],
+        "bench": ["primes"],
+        "impl": ["array", "rad", "delay"],
+        "args": ["-n 10000000"]
+      },
+      {
+        "tag": ["bignum-add"],
+        "bench": ["bignum-add"],
+        "impl": ["array", "rad", "delay"],
+        "args": ["-n 50000000"]
+      },
+      {
+        "tag": ["integrate"],
+        "bench": ["integrate"],
+        "impl": ["array", "delay"],
+        "args": ["-n 50000000"]
+      }
+    ]
+}

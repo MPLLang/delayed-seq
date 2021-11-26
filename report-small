@@ -1,0 +1,796 @@
+#!/usr/bin/python
+
+import json
+import sys
+import re
+import copy
+import os
+
+BLUE = '\033[94m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+RED = '\033[91m'
+ENDC = '\033[0m'
+BOLD = '\033[1m'
+NOCOLOR = ""
+UNDERLINE = '\033[4m'
+
+class colortext:
+  def __init__(self, text, color):
+    self.text = text
+    self.color = color
+  def __len__(self):
+    return len(self.text)
+  def __str__(self):
+    return BOLD + self.color + self.text + ENDC
+def green(s):
+  return colortext(s, GREEN)
+def red(s):
+  return colortext(s, RED)
+def bolded(s):
+  return colortext(s, NOCOLOR)
+
+def displayTag(t):
+  return t
+
+def json_careful_loads(s):
+  try:
+    return json.loads(s)
+  except Exception as e:
+    sys.stderr.write("[ERR] Error while parsing json: {}\n".format(e))
+    sys.exit(1)
+
+def json_careful_readlines(f):
+  return [ json_careful_loads(line.rstrip('\n')) for line in f ]
+
+def safeInsert(dict, key, value):
+  if key not in dict:
+    dict[key] = value
+  else:
+    sys.stderr.write("[WARN] Key {} is already in use; trying _{} instead.\n".format(key))
+    safeInsert(dict, "_" + key, value)
+
+def reCompile(exp):
+  return re.compile(exp, re.MULTILINE)
+
+# def parseCommaInteger(s):
+#   return int(s.replace(",", ""))
+
+# local reclaimed: 32859049984
+# num local: 20999
+# local gc time: 4541
+# promo time: 8
+
+def parseKiB(kibStr):
+  return float(int(kibStr)) * 1024.0 / 1000.0
+
+def parseB(bytesStr):
+  return int(bytesStr) / 1000.0
+
+def parseExectimes(stdout):
+  pat = reCompile(r"^exectime\s+(\d+.\d+)s$")
+  return [float(x) for x in pat.findall(stdout)]
+
+statsPatterns = \
+  [ #("time", float, reCompile(r"^end-to-end\s+(\d+.\d+)s$"))
+  #,
+    ("space", parseKiB, reCompile(r"^\s*Maximum resident set size \(kbytes\): (\d+).*$"))
+  # , ("num-local", int, reCompile(r"^num local: (\d+)$"))
+  # , ("local-reclaimed", parseB, reCompile(r"^local reclaimed: (\d+)$"))
+  # , ("local-time", int, reCompile(r"^local gc time: (\d+)$"))
+  # , ("promo-time", int, reCompile(r"^promo time: (\d+)$"))
+  # , ("root-reclaimed", parseB, reCompile(r"^root cc reclaimed: (\d+)$"))
+  # , ("internal-reclaimed", parseB, reCompile(r"^internal cc reclaimed: (\d+)$"))
+  # , ("num-root", int, reCompile(r"^num root cc: (\d+)$"))
+  # , ("num-internal", int, reCompile(r"^num internal cc: (\d+)$"))
+  # , ("root-time", int, reCompile(r"^root cc time: (\d+)$"))
+  # , ("internal-time", int, reCompile(r"^internal cc time: (\d+)$"))
+  # , ("working-set", parseCommaInteger, reCompile(r"^max bytes live: (.*) bytes$"))
+  ]
+
+renameConfig = {
+  'mlton': 'mlton',
+  'mpl': 'mpl',
+  'mpl-cc': 'mpl-cc',
+  'cpp': 'cpp',
+  'mpl-cc-space': 'mpl-cc-space',
+  'cpp-space': 'cpp-space',
+  'mpl-latest': 'mpl-cc',
+  'mpl-latest-space': 'mpl-cc-space',
+  'mpl-v02': 'mpl-cc',
+  'mpl-v02-space': 'mpl-cc-space'
+}
+
+def renameTag(t):
+  if t == "tokens-two-scan":
+    return "tokens"
+  return t
+
+foundTags = set()
+foundProcs = set()
+
+def parseStats(row):
+  newRow = copy.deepcopy(row)
+  for (name, convert, pat) in statsPatterns:
+    m = pat.search(newRow['stdout'] + newRow['stderr'])
+    if m:
+      safeInsert(newRow, name, convert(m.group(1)))
+  newRow['procs'] = int(newRow.get('procs', '1'))
+  newRow['config'] = renameConfig[row['config']]
+  newRow['tag'] = renameTag(row['tag'])
+
+  tms = parseExectimes(newRow['stdout'] + newRow['stderr'])
+  tms = tms[-5:]
+  try:
+    newRow['avgtime'] = sum(tms) / len(tms)
+  except:
+    newRow['avgtime'] = None
+
+  # try:
+  #   newRow['space'] = float(newRow['space'])
+  # except KeyError:
+  #   pass
+
+  # try:
+  #   newRow['time'] = float(newRow['elapsed'])
+  # except KeyError:
+  #   pass
+
+  foundTags.add(newRow['tag'])
+  foundProcs.add(newRow['procs'])
+
+  return newRow
+
+def findTrials(data, config, tag, impl, procs):
+  result = []
+  for row in data:
+    if (row['config'] == config and \
+        row['tag'] == tag and \
+        row['impl'] == impl and \
+        row['procs'] == procs):
+      result.append(row)
+  return result
+
+# ======================================================================
+
+def averageTime(data, config, tag, impl, procs):
+  tms = [ r['avgtime'] for r in findTrials(data, config, tag, impl, procs) if 'avgtime' in r ]
+  try:
+    return tms[-1]
+  except:
+    return None
+
+def averageSpace(data, config, tag, impl, procs):
+  sp = [ r['space'] for r in findTrials(data, config, tag, impl, procs) if 'space' in r ]
+
+  if len(sp) > 10:
+    sp = sp[-10:]
+
+  try:
+    return sum(sp) / len(sp)
+  except:
+    return None
+
+# ======================================================================
+
+def tm(t):
+  if t is None:
+    return None
+  if t == 0.0:
+    return int(0)
+  # if t > 10.0:
+  #   return int(round(t))
+  try:
+    if t < 1.0:
+      return round(t, 3)
+    if t < 10.0:
+      return round(t, 2)
+    elif t < 100.0:
+      return round(t, 1)
+    else:
+      return round(t)
+  except TypeError:
+    print ("[ERR] Got type error trying to round {}".format(repr(t)))
+    return None
+
+def ov(x):
+  if x is None:
+    return None
+  return "{:.2f}".format(x)
+
+def rat(x):
+  if x is None:
+    return None
+  if x >= 10.0:
+    return str(int(round(x)))
+  if x >= 1:
+    return "{:.1f}".format(x)
+  else:
+    return "{:.2f}".format(x)
+
+def su(x):
+  if x is None:
+    return None
+  return str(int(round(x)))
+
+def bu(x):
+  if x is None:
+    return None
+  return "{:.1f}".format(x)
+
+def sp(kb):
+  if kb is None:
+    return None
+  num = kb
+  for unit in ['K','M','G']:
+    if num < 1000:
+      return "%3.1f %s" % (num, unit)
+    num = num / 1000
+  return "%3.1f %s" % (num, 'T')
+
+def sfmt(xx):
+  if xx is None:
+    return "--"
+  elif type(xx) is str:
+    return xx
+  elif xx < 0.01:
+    return noLeadZero("{:.4f}".format(xx))
+  elif xx < 0.1:
+    return noLeadZero("{:.3f}".format(xx))
+  elif xx < 1.0:
+    return noLeadZero("{:.2f}".format(xx))
+  elif xx < 10.0:
+    return "{:.1f}".format(xx)
+  else:
+    return str(int(round(xx)))
+
+def spg(kb):
+  try:
+    gb = kb / (1000.0 * 1000.0)
+    if gb < .01:
+      return round(gb, 4)
+    elif gb < .1:
+      return round(gb, 3)
+    elif gb < 1.0:
+      return round(gb, 2)
+    elif gb < 10.0:
+      return round(gb, 1)
+    else:
+      return round(gb, 0)
+  except:
+    return None
+
+def makeBold(s):
+  try:
+    return "{\\bf " + s + "}"
+  except Exception as e:
+    sys.stderr.write("[WARN] " + str(e) + "\n")
+    return "--"
+
+def pcd(b, a):
+  try:
+    xx = int(round(100.0 * (b-a) / abs(a)))
+    return xx
+  except:
+    return None
+
+def latexpcd(b, a, highlight=True):
+  try:
+    xx = pcd(b, a)
+    result = ("+" if xx >= 0.0 else "") + ("{}\\%".format(xx))
+    if highlight and (xx < 0):
+      return makeBold(result)
+    else:
+      return result
+  except Exception as e:
+    sys.stderr.write("[WARN] " + str(e) + "\n")
+    return "--"
+
+def fmt(xx):
+  if xx is None:
+    return "--"
+  elif type(xx) is str:
+    return xx
+  elif xx < 1.0:
+    return noLeadZero("{:.3f}".format(xx))
+  elif xx < 10.0:
+    return "{:.2f}".format(xx)
+  elif xx < 100.0:
+    return "{:.1f}".format(xx)
+  else:
+    return str(int(round(xx)))
+
+# =========================================================================
+
+delimWidth = 1
+
+def makeline(row, widths, align):
+  bits = []
+  i = 0
+  while i < len(row):
+    j = i+1
+    while j < len(row) and (row[j] is None):
+      j += 1
+    availableWidth = sum(widths[i:j]) + delimWidth*(j-i-1)
+    s = str(row[i])
+    w = " " * (availableWidth - len(row[i]))
+    aa = align(i)
+    if aa == "l":
+      ln = s + w
+    elif aa == "r":
+      ln = w + s
+    elif aa == "c":
+      ln = w[:len(w)/2] + s + w[len(w)/2:]
+    else:
+      raise ValueError("invalid formatter: {}".format(aa))
+    bits.append(ln)
+    i = j
+  return (" " * delimWidth).join(bits)
+
+def table(rows, align=None):
+  numCols = max(len(row) for row in rows if not isinstance(row, str))
+
+  widths = [0] * numCols
+  for row in rows:
+    # string rows are used for formatting
+    if isinstance(row, str):
+      continue
+
+    i = 0
+    while i < len(row):
+      j = i+1
+      while j < len(row) and (row[j] is None):
+        j += 1
+      # rw = len(stripANSI(str(row[i])))
+      # rw = len(str(row[i]))
+      rw = len(row[i])
+      for k in xrange(i, j):
+        w = (rw / (j-i)) + (1 if k < rw % (j-i) else 0)
+        widths[k] = max(widths[k], w)
+      i = j
+
+  totalWidth = sum(widths) + delimWidth*(numCols-1)
+
+  def aa(i):
+    try:
+      return align(i)
+    except:
+      return "l"
+
+  output = []
+  for row in rows:
+    if row == "-" or row == "=":
+      output.append(row * totalWidth)
+      continue
+    elif isinstance(row, str):
+      raise ValueError("bad row: {}".format(row))
+    output.append(makeline(row, widths, aa))
+
+  return "\n".join(output)
+
+# =========================================================================
+
+def mostRecentResultsFile(ws=False):
+  files = os.listdir("small/results")
+  pattern = r'\d{6}-\d{6}.*'
+  if ws:
+    pattern = r'ws-' + pattern
+  # A bit of a hack. Filenames are ...YYMMDD-hhmmss, so lexicographic string
+  # comparison is correct for finding the most recent (i.e. maximum) file
+  mostRecent = max(p for p in files if re.match(pattern, p))
+  return mostRecent
+
+if len(sys.argv) > 1:
+  timingsFile = sys.argv[1]
+else:
+  print("[INFO] no results file argument; finding most recent")
+  try:
+    mostRecent = mostRecentResultsFile()
+  except:
+    print("[ERR] could not find most recent results file\n " + \
+          "  check that these are formatted as 'YYMMSS-hhmmss'")
+    sys.exit(1)
+  timingsFile = os.path.join('small/results', mostRecent)
+
+print("[INFO] reading {}\n".format(timingsFile))
+with open(timingsFile, 'r') as data:
+  resultsData = json_careful_readlines(data)
+D = [ parseStats(row) for row in resultsData ]
+P = sorted(list(foundProcs))
+maxp = max(foundProcs)
+
+orderedTags = sorted(list(foundTags))
+
+def keepTag(t):
+  return (t != "filter") and (t != "parens")
+
+orderedTags = [ t for t in orderedTags if keepTag(t) ]
+
+def implsOfTag(t):
+  result = set()
+  for r in D:
+    if 'tag' in r and r['tag'] == t and 'impl' in r:
+      result.add(r['impl'])
+  return result
+
+def defaultAlign(i):
+  return "r" if i == 0 else "c"
+
+# headers = ['Benchmark', 'Impl', 'MPL(1)', 'C++(1)', 'MPL({})'.format(maxp), 'C++({})'.format(maxp)]
+# tt = [headers, "="]
+# for tag in orderedTags:
+#   for impl in implsOfTag(tag):
+#     thisRow = [tag,
+#                impl,
+#                tm(averageTime(D, 'mpl-cc', tag, impl, 1)),
+#                tm(averageTime(D, 'cpp', tag, impl, 1)),
+#                tm(averageTime(D, 'mpl-cc', tag, impl, maxp)),
+#                tm(averageTime(D, 'cpp', tag, impl, maxp))
+#               ]
+#     thisRow = [thisRow[0]] + [str(x) if x is not None else "--" for x in thisRow[1:]]
+#     tt.append(thisRow)
+
+# print("SMALL EXPERIMENTS: TIMINGS")
+# print(table(tt, defaultAlign))
+# print("")
+
+# headers = ['Benchmark', 'Impl', 'MPL(1)', 'C++(1)', 'MPL({})'.format(maxp), 'C++({})'.format(maxp)]
+# tt = [headers, "="]
+# for tag in orderedTags:
+#   for impl in implsOfTag(tag):
+#     thisRow = [tag,
+#                impl,
+#                sp(averageSpace(D, 'mpl-cc', tag, impl, 1)),
+#                sp(averageSpace(D, 'cpp', tag, impl, 1)),
+#                sp(averageSpace(D, 'mpl-cc', tag, impl, maxp)),
+#                sp(averageSpace(D, 'cpp', tag, impl, maxp))
+#               ]
+#     thisRow = [ (x if x is not None else "--") for x in thisRow ]
+#     tt.append(thisRow)
+
+# print("SMALL EXPERIMENTS: SPACE (MAX RESIDENCY)")
+# print(table(tt, defaultAlign))
+# print("")
+
+# percent difference (b-a)/|a|
+def pcd(b, a):
+  try:
+    xx = 100.0 * (b-a) / abs(a)
+    result = ("+" if xx >= 0.0 else "") + ("{:.1f}%".format(xx))
+    if xx > 0.0:
+      return red(result)
+    else:
+      return result
+  except:
+    return None
+
+def sd(x, y):
+  try:
+    return x / y
+  except:
+    return None
+
+def ss(x, y):
+  try:
+    return x - y
+  except:
+    return None
+
+def noLeadZero(x):
+  try:
+    if "0" == x[:1]:
+      return x[1:]
+  except:
+    pass
+  return x
+
+# header = ["Benchmark", "Impl", "Time(1)", "Time({})".format(maxp), "Space(1)", "Space({})".format(maxp)]
+# tt = [header, "="]
+# for tag in orderedTags:
+#   for impl in implsOfTag(tag):
+#     # tMLton = tm(averageTime(D, 'mlton', tag, 1))
+#     tMPL1 = tm(averageTime(D, 'mpl', tag, impl, 1))
+#     tMPLp = tm(averageTime(D, 'mpl', tag, impl, maxp))
+#     tMPLcc1 = tm(averageTime(D, 'mpl-cc', tag, impl, 1))
+#     tMPLccp = tm(averageTime(D, 'mpl-cc', tag, impl, maxp))
+#     # rMLton = averageSpace(D, 'mlton', tag, 1)
+#     rMPL1 = averageSpace(D, 'mpl', tag, impl, 1)
+#     rMPLp = averageSpace(D, 'mpl', tag, impl, maxp)
+#     rMPLcc1 = averageSpace(D, 'mpl-cc', tag, impl, 1)
+#     rMPLccp = averageSpace(D, 'mpl-cc', tag, impl, maxp)
+
+#     t1 = pcd(tMPLcc1, tMPL1)
+#     tp = pcd(tMPLccp, tMPLp)
+#     r1 = pcd(rMPLcc1, rMPL1)
+#     rp = pcd(rMPLccp, rMPLp)
+
+#     row = [tag, impl, t1, tp, r1, rp]
+#     row = [x if x is not None else "--" for x in row]
+#     tt.append(row)
+
+# print("MPL/CC versus MPL")
+# print(table(tt, defaultAlign))
+# print("")
+
+def arrayTime(config, tag, procs):
+  return tm(averageTime(D, config, tag, 'array', procs))
+
+def delayTime(config, tag, procs):
+  return tm(averageTime(D, config, tag, 'delay', procs))
+
+def radTime(config, tag, procs):
+  return tm(averageTime(D, config, tag, 'rad', procs))
+
+def arraySpace(config, tag, procs):
+  return spg(averageSpace(D, config, tag, 'array', procs))
+
+def delaySpace(config, tag, procs):
+  return spg(averageSpace(D, config, tag, 'delay', procs))
+
+def radSpace(config, tag, procs):
+  return spg(averageSpace(D, config, tag, 'rad', procs))
+
+def arrayVsDelayTime(config, tag, procs):
+  arrt = tm(averageTime(D, config, tag, 'array', procs))
+  delt = tm(averageTime(D, config, tag, 'delay', procs))
+  frac = sd(arrt, delt)
+  return rat(frac)
+
+def radVsDelayTime(config, tag, procs):
+  radt = tm(averageTime(D, config, tag, 'rad', procs))
+  delt = tm(averageTime(D, config, tag, 'delay', procs))
+  frac = sd(radt, delt)
+  return rat(frac)
+
+def arrayVsDelaySpace(config, tag, procs):
+  arrr = spg(averageSpace(D, config, tag, 'array', procs))
+  delr = spg(averageSpace(D, config, tag, 'delay', procs))
+  frac = sd(arrr, delr)
+  return rat(frac)
+
+def radVsDelaySpace(config, tag, procs):
+  radr = spg(averageSpace(D, config, tag, 'rad', procs))
+  delr = spg(averageSpace(D, config, tag, 'delay', procs))
+  frac = sd(radr, delr)
+  return rat(frac)
+
+# header1 = ["Benchmark", "MPL(1)", "MPL({})".format(maxp), "C++(1)", "C++({})".format(maxp)]
+# tt = [header1, "="]
+# for tag in orderedTags:
+#   row = [
+#     tag,
+#     arrayVsDelayTime('mpl-cc', tag, 1),
+#     arrayVsDelayTime('mpl-cc', tag, maxp),
+#     arrayVsDelayTime('cpp', tag, 1),
+#     arrayVsDelayTime('cpp', tag, maxp)
+#   ]
+#   row = [x if x is not None else "--" for x in row]
+#   tt.append(row)
+
+# print("SMALL EXPERIMENTS: DELAY TIME IMPROVEMENT VS ARRAY")
+# print(table(tt, defaultAlign))
+# print("")
+
+# ===========================================================================
+
+allradtags = ['bestcut','bfs','bignum-add','primes','tokens']
+radtags = [x for x in orderedTags if x in allradtags]
+nonradtags = [x for x in orderedTags if x not in allradtags]
+
+# ======================================================================
+
+def fmtRatio(frac):
+  if frac is None:
+    return "--"
+  try:
+    # return bolded(frac)
+    return frac
+  except:
+    return "--"
+
+############################################################################
+
+
+header1 = ["", "__________________TIME__________________", None, None, None, None, None, None, None, "__________________SPACE__________________", None, None, None, None, None, None, None]
+header2 = ["", "_________P=1_________", None, None, None, "_________P={}_________".format(maxp), None, None, None, "_________P=1_________", None, None, None, "_________P={}_________".format(maxp), None, None, None]
+header3 = ["", "A", "R", "Ours", "R/Ours", "A", "R", "Ours", "R/Ours", "A", "R", "Ours", "R/Ours", "A", "R", "Ours", "R/Ours"]
+tt = [header1, header2, header3, "="]
+for tag in radtags:
+  row = \
+    [ tag
+    , fmt(arrayTime('mpl-cc', tag, 1))
+    , fmt(radTime('mpl-cc', tag, 1))
+    , fmt(delayTime('mpl-cc', tag, 1))
+    , fmtRatio(radVsDelayTime('mpl-cc', tag, 1))
+    , fmt(arrayTime('mpl-cc', tag, maxp))
+    , fmt(radTime('mpl-cc', tag, maxp))
+    , fmt(delayTime('mpl-cc', tag, maxp))
+    , fmtRatio(radVsDelayTime('mpl-cc', tag, maxp))
+    , sfmt(arraySpace('mpl-cc', tag, 1))
+    , sfmt(radSpace('mpl-cc', tag, 1))
+    , sfmt(delaySpace('mpl-cc', tag, 1))
+    , fmtRatio(radVsDelaySpace('mpl-cc', tag, 1))
+    , sfmt(arraySpace('mpl-cc', tag, maxp))
+    , sfmt(radSpace('mpl-cc', tag, maxp))
+    , sfmt(delaySpace('mpl-cc', tag, maxp))
+    , fmtRatio(radVsDelaySpace('mpl-cc', tag, maxp))
+    ]
+  row = [x if x is not None else "--" for x in row]
+  tt.append(row)
+
+tt.append("-")
+
+for tag in radtags:
+  row = \
+    [ tag
+    , fmt(arrayTime('cpp', tag, 1))
+    , fmt(radTime('cpp', tag, 1))
+    , fmt(delayTime('cpp', tag, 1))
+    , fmtRatio(radVsDelayTime('cpp', tag, 1))
+    , fmt(arrayTime('cpp', tag, maxp))
+    , fmt(radTime('cpp', tag, maxp))
+    , fmt(delayTime('cpp', tag, maxp))
+    , fmtRatio(radVsDelayTime('cpp', tag, maxp))
+    , sfmt(arraySpace('cpp', tag, 1))
+    , sfmt(radSpace('cpp', tag, 1))
+    , sfmt(delaySpace('cpp', tag, 1))
+    , fmtRatio(radVsDelaySpace('cpp', tag, 1))
+    , sfmt(arraySpace('cpp', tag, maxp))
+    , sfmt(radSpace('cpp', tag, maxp))
+    , sfmt(delaySpace('cpp', tag, maxp))
+    , fmtRatio(radVsDelaySpace('cpp', tag, maxp))
+    ]
+  row = [x if x is not None else "--" for x in row]
+  tt.append(row)
+
+tt.append("=")
+
+print(table(tt, defaultAlign))
+print("""\
+  SMALL EXPERIMENTS: BID IMPROVEMENTS. Compare with Figure 9 in
+  paper, but with two differences: problem sizes reduced by 10x, and
+  fewer processors in the parallel run. Ratios 'R/Ours' on P=1
+  should still be in same ballpark as Figure 9 in paper.""")
+print("\n")
+
+
+header1 = ["", "________________TIME________________", None, None, None, None, None, "________________SPACE________________", None, None, None, None, None]
+header2 = ["", "_______P=1_______", None, None, "_______P={}_______".format(maxp), None, None, "_______P=1_______", None, None, "_______P={}_______".format(maxp), None, None]
+header3 = ["", "A", "Ours", "A/Ours", "A", "Ours", "A/Ours", "A", "Ours", "A/Ours", "A", "Ours", "A/Ours"]
+tt = [header1, header2, header3, "="]
+for tag in nonradtags:
+  row = \
+    [ tag
+    , fmt(arrayTime('mpl-cc', tag, 1))
+    , fmt(delayTime('mpl-cc', tag, 1))
+    , fmtRatio(arrayVsDelayTime('mpl-cc', tag, 1))
+    , fmt(arrayTime('mpl-cc', tag, maxp))
+    , fmt(delayTime('mpl-cc', tag, maxp))
+    , fmtRatio(arrayVsDelayTime('mpl-cc', tag, maxp))
+    , sfmt(arraySpace('mpl-cc', tag, 1))
+    , sfmt(delaySpace('mpl-cc', tag, 1))
+    , fmtRatio(arrayVsDelaySpace('mpl-cc', tag, 1))
+    , sfmt(arraySpace('mpl-cc', tag, maxp))
+    , sfmt(delaySpace('mpl-cc', tag, maxp))
+    , fmtRatio(arrayVsDelaySpace('mpl-cc', tag, maxp))
+    ]
+  row = [x if x is not None else "--" for x in row]
+  tt.append(row)
+
+tt.append("-")
+
+for tag in nonradtags:
+  row = \
+    [ tag
+    , fmt(arrayTime('cpp', tag, 1))
+    , fmt(delayTime('cpp', tag, 1))
+    , fmtRatio(arrayVsDelayTime('cpp', tag, 1))
+    , fmt(arrayTime('cpp', tag, maxp))
+    , fmt(delayTime('cpp', tag, maxp))
+    , fmtRatio(arrayVsDelayTime('cpp', tag, maxp))
+    , sfmt(arraySpace('cpp', tag, 1))
+    , sfmt(delaySpace('cpp', tag, 1))
+    , fmtRatio(arrayVsDelaySpace('cpp', tag, 1))
+    , sfmt(arraySpace('cpp', tag, maxp))
+    , sfmt(delaySpace('cpp', tag, maxp))
+    , fmtRatio(arrayVsDelaySpace('cpp', tag, maxp))
+    ]
+  row = [x if x is not None else "--" for x in row]
+  tt.append(row)
+
+tt.append("=")
+
+print(table(tt, defaultAlign))
+print("""\
+  SMALL EXPERIMENTS: RAD-ONLY IMPROVEMENTS. Compare with Figure 10 in
+  paper, but with two differences: problem sizes reduced by 10x, and
+  fewer processors in the parallel run. Ratios 'A/Ours' on P=1 should
+  still be in same ballpark as Figure 10 in paper.""")
+print("\n")
+
+##############################################################################
+## RAD
+
+#############################################################################
+
+# ===========================================================================
+
+# speedupTags = [
+#   "integrate",
+#   "mcss-prefixes",
+#   "primes"
+# ]
+
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+for config in ["mpl-cc", "cpp"]:
+  for tag in orderedTags:
+    outputName = 'small/figures/{}-{}-speedups.pdf'.format(config, tag)
+    try:
+      theseImpls = ["delay", "array"] + (["rad"] if tag in radtags else [])
+
+      plt.figure(figsize=(7,7))
+      # markers = ['o','v','^','<','>','s','*','d','D','+','x','|','','','','','']
+      colors = ['blue', 'green', 'red', 'darkturquoise', 'black', 'darkviolet', 'goldenrod', 'dimgrey']
+      markers = ['o','v','^','<','>','s','d','D','*']
+      linestyles = ['solid', 'dashed']
+
+      # markers = ['.'] * len(speedupTags)
+      # procs = [1,10,20,30,40,50,60,72]
+      procs = P
+
+      fontSize = 30
+      legendFontSize = 24
+      markerSize = 10
+
+      plt.plot(procs, procs, marker="", color="grey", linewidth=0.5)
+      lines = []
+      for (i, impl) in enumerate(theseImpls):
+        baseline = averageTime(D, config, tag, 'delay', 1)
+        speedups = map(lambda p: baseline / averageTime(D, config, tag, impl, p), procs)
+        color = colors[i % len(colors)]
+        marker = markers[i % len(markers)]
+        linestyle = linestyles[i / len(markers)]
+        lines.append(plt.plot(procs, speedups, linestyle=linestyle, marker=marker, markersize=markerSize, linewidth=1, color=color))
+
+      # this sets the legend.
+      font = {
+        'size': legendFontSize,
+        #'family' : 'normal',
+        #'weight' : 'bold',
+      }
+      matplotlib.rc('font', **font)
+
+      # make sure to use truetype fonts
+      matplotlib.rcParams['pdf.fonttype'] = 42
+      matplotlib.rcParams['ps.fonttype'] = 42
+
+      # set legend position
+      matplotlib.rcParams['legend.loc'] = 'upper left'
+
+      ticks = [i*2 for i in xrange(0, 5)]
+
+      # plt.xlabel('Processors', fontsize=fontSize)
+      # plt.ylabel('Speedup', fontsize=fontSize)
+      plt.yticks(ticks, fontsize=fontSize)
+      plt.xticks(ticks, fontsize=fontSize)
+      plt.gca().grid(axis='both', linestyle='dotted')
+      plt.gca().set_axisbelow(True)
+      # plt.margins(y=10)
+      plt.legend([b[0] for b in lines], theseImpls)
+
+      plt.savefig(outputName, bbox_inches='tight')
+      sys.stdout.write("[INFO] output written to {}\n".format(outputName))
+
+      plt.close()
+
+    except Exception as e:
+      sys.stderr.write("[WARN] error while generating {}: {}\n".format(outputName, e))
+
+# ======================================================================
+
+
+print("[INFO] done reporting {}".format(timingsFile))

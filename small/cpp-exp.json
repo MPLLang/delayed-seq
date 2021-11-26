@@ -1,0 +1,49 @@
+{
+  "templates":
+    [
+      {
+        "match": { "config": "cpp", "procs": "(?!1$)" },
+        "template": "<procs?PARLAY_NUM_THREADS={}> /usr/bin/time -v numactl -i all -- bin/<bench>.<impl>.<config>.bin <args?{}> <args1?{}>"
+      },
+      {
+        "match": { "config": "cpp" },
+        "template": "<procs?PARLAY_NUM_THREADS={}> /usr/bin/time -v bin/<bench>.<impl>.<config>.bin <args?{}> <args1?{}>"
+      }
+    ],
+
+  "globals":
+    {
+      "procs": ["1", "4", "8"],
+      "config": ["cpp"],
+      "cwd": ["cpp-new"],
+      "args1": ["-repeat 5 -warmup 2"]
+    },
+
+  "specs":
+    [
+      {
+        "tag": ["mcss"],
+        "bench": ["mcss"],
+        "impl": ["array", "delay"],
+        "args": ["-n 50000000"]
+      },
+      {
+        "tag": ["primes"],
+        "bench": ["primes"],
+        "impl": ["array", "rad", "delay"],
+        "args": ["-n 10000000"]
+      },
+      {
+        "tag": ["bignum-add"],
+        "bench": ["bignum-add"],
+        "impl": ["array", "rad", "delay"],
+        "args": ["-n 50000000"]
+      },
+      {
+        "tag": ["integrate"],
+        "bench": ["integrate"],
+        "impl": ["array", "delay"],
+        "args": ["-n 50000000"]
+      }
+    ]
+}

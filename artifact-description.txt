@@ -1,0 +1,23 @@
+Step 1. Download docker image (TODO)
+... ppopp22-artifact ...
+
+
+
+Step 2. Run docker. We first make a local directory 'ARTIFACT-RESULTS' which
+will be mounted in the docker container (this lets us copy files out of the
+container). Then we start the container from the ppopp22-artifact image.
+Note: The '--privileged' flag is necessary for NUMA control in the experiments.
+
+$ mkdir ARTIFACT-RESULTS
+$ sudo docker run -v $(pwd -P)/ARTIFACT-RESULTS:/ARTIFACT-RESULTS --privileged --rm -it ppopp22-artifact /bin/bash
+
+
+
+Setp 3. Small experiments (~5 minutes):
+$ ./run-small
+$ ./report-small
+
+
+
+Step 3. Generate inputs for larger experiments (~2 minutes):
+$ ./generate-inputs

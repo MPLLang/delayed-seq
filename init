@@ -11,3 +11,6 @@ $ROOT/scripts/install_mpls
 mkdir -p figures
 mkdir -p results
 mkdir -p inputs
+
+mkdir -p small/figures
+mkdir -p small/results
