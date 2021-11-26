@@ -13,11 +13,18 @@ $ sudo docker run -v $(pwd -P)/ARTIFACT-RESULTS:/ARTIFACT-RESULTS --privileged -
 
 
 
-Setp 3. Small experiments (~5 minutes):
-$ ./run-small
-$ ./report-small
+Step 3. Small experiments (~5 minutes). Requires at least 6GB RAM and 8 cores.
+Inside the container, the prompt will be a '#'. Run the following commands
+inside the container.
+# ./run-small
+# ./report-small | tee /ARTIFACT-RESULTS/small-output
+# cp -r small/figures /ARTIFACT-RESULTS/small-figures
 
 
 
-Step 3. Generate inputs for larger experiments (~2 minutes):
+Step 4. Generate inputs for larger experiments (~2 minutes):
 $ ./generate-inputs
+
+
+
+Step 5. Larger experiments (optional, XXX hours):
