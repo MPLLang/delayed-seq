@@ -411,43 +411,43 @@ def implsOfTag(t):
   return result
 
 def defaultAlign(i):
-  return "r" if i == 0 else "l"
+  return "r" if i == 0 else "c"
 
-headers = ['Benchmark', 'Impl', 'MPL(1)', 'C++(1)', 'MPL({})'.format(maxp), 'C++({})'.format(maxp)]
-tt = [headers, "="]
-for tag in orderedTags:
-  for impl in implsOfTag(tag):
-    thisRow = [tag,
-               impl,
-               tm(averageTime(D, 'mpl-cc', tag, impl, 1)),
-               tm(averageTime(D, 'cpp', tag, impl, 1)),
-               tm(averageTime(D, 'mpl-cc', tag, impl, maxp)),
-               tm(averageTime(D, 'cpp', tag, impl, maxp))
-              ]
-    thisRow = [thisRow[0]] + [str(x) if x is not None else "--" for x in thisRow[1:]]
-    tt.append(thisRow)
+# headers = ['Benchmark', 'Impl', 'MPL(1)', 'C++(1)', 'MPL({})'.format(maxp), 'C++({})'.format(maxp)]
+# tt = [headers, "="]
+# for tag in orderedTags:
+#   for impl in implsOfTag(tag):
+#     thisRow = [tag,
+#                impl,
+#                tm(averageTime(D, 'mpl-cc', tag, impl, 1)),
+#                tm(averageTime(D, 'cpp', tag, impl, 1)),
+#                tm(averageTime(D, 'mpl-cc', tag, impl, maxp)),
+#                tm(averageTime(D, 'cpp', tag, impl, maxp))
+#               ]
+#     thisRow = [thisRow[0]] + [str(x) if x is not None else "--" for x in thisRow[1:]]
+#     tt.append(thisRow)
 
-print("TIMINGS")
-print(table(tt, defaultAlign))
-print("")
+# print("TIMINGS")
+# print(table(tt, defaultAlign))
+# print("")
 
-headers = ['Benchmark', 'Impl', 'MPL(1)', 'C++(1)', 'MPL({})'.format(maxp), 'C++({})'.format(maxp)]
-tt = [headers, "="]
-for tag in orderedTags:
-  for impl in implsOfTag(tag):
-    thisRow = [tag,
-               impl,
-               sp(averageSpace(D, 'mpl-cc-space', tag, impl, 1)),
-               sp(averageSpace(D, 'cpp-space', tag, impl, 1)),
-               sp(averageSpace(D, 'mpl-cc-space', tag, impl, maxp)),
-               sp(averageSpace(D, 'cpp-space', tag, impl, maxp))
-              ]
-    thisRow = [ (x if x is not None else "--") for x in thisRow ]
-    tt.append(thisRow)
+# headers = ['Benchmark', 'Impl', 'MPL(1)', 'C++(1)', 'MPL({})'.format(maxp), 'C++({})'.format(maxp)]
+# tt = [headers, "="]
+# for tag in orderedTags:
+#   for impl in implsOfTag(tag):
+#     thisRow = [tag,
+#                impl,
+#                sp(averageSpace(D, 'mpl-cc-space', tag, impl, 1)),
+#                sp(averageSpace(D, 'cpp-space', tag, impl, 1)),
+#                sp(averageSpace(D, 'mpl-cc-space', tag, impl, maxp)),
+#                sp(averageSpace(D, 'cpp-space', tag, impl, maxp))
+#               ]
+#     thisRow = [ (x if x is not None else "--") for x in thisRow ]
+#     tt.append(thisRow)
 
-print("SPACE (MAX RESIDENCY)")
-print(table(tt, defaultAlign))
-print("")
+# print("SPACE (MAX RESIDENCY)")
+# print(table(tt, defaultAlign))
+# print("")
 
 # percent difference (b-a)/|a|
 def pcd(b, a):
@@ -551,44 +551,168 @@ def radVsDelaySpace(config, tag, procs):
   frac = sd(radr, delr)
   return rat(frac)
 
-header1 = ["Benchmark", "MPL(1)", "MPL({})".format(maxp), "C++(1)", "C++({})".format(maxp)]
-tt = [header1, "="]
-for tag in orderedTags:
-  row = [
-    tag,
-    arrayVsDelayTime('mpl-cc', tag, 1),
-    arrayVsDelayTime('mpl-cc', tag, maxp),
-    arrayVsDelayTime('cpp', tag, 1),
-    arrayVsDelayTime('cpp', tag, maxp)
-  ]
-  row = [x if x is not None else "--" for x in row]
-  tt.append(row)
+# header1 = ["Benchmark", "MPL(1)", "MPL({})".format(maxp), "C++(1)", "C++({})".format(maxp)]
+# tt = [header1, "="]
+# for tag in orderedTags:
+#   row = [
+#     tag,
+#     arrayVsDelayTime('mpl-cc', tag, 1),
+#     arrayVsDelayTime('mpl-cc', tag, maxp),
+#     arrayVsDelayTime('cpp', tag, 1),
+#     arrayVsDelayTime('cpp', tag, maxp)
+#   ]
+#   row = [x if x is not None else "--" for x in row]
+#   tt.append(row)
 
-print("ARRAY versus DELAY: time improvement factors")
-print(table(tt, defaultAlign))
-print("")
+# print("ARRAY versus DELAY: time improvement factors")
+# print(table(tt, defaultAlign))
+# print("")
 
-header1 = ["Benchmark", "MPL(1)", "MPL({})".format(maxp), "C++(1)", "C++({})".format(maxp)]
-tt = [header1, "="]
-for tag in orderedTags:
-  row = [
-    tag,
-    arrayVsDelaySpace('mpl-cc-space', tag, 1),
-    arrayVsDelaySpace('mpl-cc-space', tag, maxp),
-    arrayVsDelaySpace('cpp-space', tag, 1),
-    arrayVsDelaySpace('cpp-space', tag, maxp)
-  ]
-  row = [x if x is not None else "--" for x in row]
-  tt.append(row)
+# header1 = ["Benchmark", "MPL(1)", "MPL({})".format(maxp), "C++(1)", "C++({})".format(maxp)]
+# tt = [header1, "="]
+# for tag in orderedTags:
+#   row = [
+#     tag,
+#     arrayVsDelaySpace('mpl-cc-space', tag, 1),
+#     arrayVsDelaySpace('mpl-cc-space', tag, maxp),
+#     arrayVsDelaySpace('cpp-space', tag, 1),
+#     arrayVsDelaySpace('cpp-space', tag, maxp)
+#   ]
+#   row = [x if x is not None else "--" for x in row]
+#   tt.append(row)
 
-print("ARRAY versus DELAY: space improvement factors")
-print(table(tt, defaultAlign))
-print("")
+# print("ARRAY versus DELAY: space improvement factors")
+# print(table(tt, defaultAlign))
+# print("")
 
 # ===========================================================================
 
 radtags = ['bestcut','bfs','bignum-add','primes','tokens']
 nonradtags = [x for x in orderedTags if x not in radtags]
+
+def fmtRatio(frac):
+  if frac is None:
+    return "--"
+  try:
+    return frac
+  except:
+    return "--"
+
+############################################################################
+
+
+header1 = ["", "__________________TIME__________________", None, None, None, None, None, None, None, "__________________SPACE__________________", None, None, None, None, None, None, None]
+header2 = ["", "_________P=1_________", None, None, None, "_________P={}_________".format(maxp), None, None, None, "_________P=1_________", None, None, None, "_________P={}_________".format(maxp), None, None, None]
+header3 = ["", "A", "R", "Ours", "R/Ours", "A", "R", "Ours", "R/Ours", "A", "R", "Ours", "R/Ours", "A", "R", "Ours", "R/Ours"]
+tt = [header1, header2, header3, "="]
+for tag in radtags:
+  row = \
+    [ tag
+    , fmt(arrayTime('mpl-cc', tag, 1))
+    , fmt(radTime('mpl-cc', tag, 1))
+    , fmt(delayTime('mpl-cc', tag, 1))
+    , fmtRatio(radVsDelayTime('mpl-cc', tag, 1))
+    , fmt(arrayTime('mpl-cc', tag, maxp))
+    , fmt(radTime('mpl-cc', tag, maxp))
+    , fmt(delayTime('mpl-cc', tag, maxp))
+    , fmtRatio(radVsDelayTime('mpl-cc', tag, maxp))
+    , sfmt(arraySpace('mpl-cc-space', tag, 1))
+    , sfmt(radSpace('mpl-cc-space', tag, 1))
+    , sfmt(delaySpace('mpl-cc-space', tag, 1))
+    , fmtRatio(radVsDelaySpace('mpl-cc-space', tag, 1))
+    , sfmt(arraySpace('mpl-cc-space', tag, maxp))
+    , sfmt(radSpace('mpl-cc-space', tag, maxp))
+    , sfmt(delaySpace('mpl-cc-space', tag, maxp))
+    , fmtRatio(radVsDelaySpace('mpl-cc-space', tag, maxp))
+    ]
+  row = [x if x is not None else "--" for x in row]
+  tt.append(row)
+
+tt.append("-")
+
+for tag in radtags:
+  row = \
+    [ tag
+    , fmt(arrayTime('cpp', tag, 1))
+    , fmt(radTime('cpp', tag, 1))
+    , fmt(delayTime('cpp', tag, 1))
+    , fmtRatio(radVsDelayTime('cpp', tag, 1))
+    , fmt(arrayTime('cpp', tag, maxp))
+    , fmt(radTime('cpp', tag, maxp))
+    , fmt(delayTime('cpp', tag, maxp))
+    , fmtRatio(radVsDelayTime('cpp', tag, maxp))
+    , sfmt(arraySpace('cpp-space', tag, 1))
+    , sfmt(radSpace('cpp-space', tag, 1))
+    , sfmt(delaySpace('cpp-space', tag, 1))
+    , fmtRatio(radVsDelaySpace('cpp-space', tag, 1))
+    , sfmt(arraySpace('cpp-space', tag, maxp))
+    , sfmt(radSpace('cpp-space', tag, maxp))
+    , sfmt(delaySpace('cpp-space', tag, maxp))
+    , fmtRatio(radVsDelaySpace('cpp-space', tag, maxp))
+    ]
+  row = [x if x is not None else "--" for x in row]
+  tt.append(row)
+
+tt.append("=")
+
+print(table(tt, defaultAlign))
+print("""\
+  FULL EXPERIMENTS: BID IMPROVEMENTS. Compare with Figure 9 in paper.""")
+print("\n")
+
+
+header1 = ["", "________________TIME________________", None, None, None, None, None, "________________SPACE________________", None, None, None, None, None]
+header2 = ["", "_______P=1_______", None, None, "_______P={}_______".format(maxp), None, None, "_______P=1_______", None, None, "_______P={}_______".format(maxp), None, None]
+header3 = ["", "A", "Ours", "A/Ours", "A", "Ours", "A/Ours", "A", "Ours", "A/Ours", "A", "Ours", "A/Ours"]
+tt = [header1, header2, header3, "="]
+for tag in nonradtags:
+  row = \
+    [ tag
+    , fmt(arrayTime('mpl-cc', tag, 1))
+    , fmt(delayTime('mpl-cc', tag, 1))
+    , fmtRatio(arrayVsDelayTime('mpl-cc', tag, 1))
+    , fmt(arrayTime('mpl-cc', tag, maxp))
+    , fmt(delayTime('mpl-cc', tag, maxp))
+    , fmtRatio(arrayVsDelayTime('mpl-cc', tag, maxp))
+    , sfmt(arraySpace('mpl-cc-space', tag, 1))
+    , sfmt(delaySpace('mpl-cc-space', tag, 1))
+    , fmtRatio(arrayVsDelaySpace('mpl-cc-space', tag, 1))
+    , sfmt(arraySpace('mpl-cc-space', tag, maxp))
+    , sfmt(delaySpace('mpl-cc-space', tag, maxp))
+    , fmtRatio(arrayVsDelaySpace('mpl-cc-space', tag, maxp))
+    ]
+  row = [x if x is not None else "--" for x in row]
+  tt.append(row)
+
+tt.append("-")
+
+for tag in nonradtags:
+  row = \
+    [ tag
+    , fmt(arrayTime('cpp', tag, 1))
+    , fmt(delayTime('cpp', tag, 1))
+    , fmtRatio(arrayVsDelayTime('cpp', tag, 1))
+    , fmt(arrayTime('cpp', tag, maxp))
+    , fmt(delayTime('cpp', tag, maxp))
+    , fmtRatio(arrayVsDelayTime('cpp', tag, maxp))
+    , sfmt(arraySpace('cpp-space', tag, 1))
+    , sfmt(delaySpace('cpp-space', tag, 1))
+    , fmtRatio(arrayVsDelaySpace('cpp-space', tag, 1))
+    , sfmt(arraySpace('cpp-space', tag, maxp))
+    , sfmt(delaySpace('cpp-space', tag, maxp))
+    , fmtRatio(arrayVsDelaySpace('cpp-space', tag, maxp))
+    ]
+  row = [x if x is not None else "--" for x in row]
+  tt.append(row)
+
+tt.append("=")
+
+print(table(tt, defaultAlign))
+print("""\
+  FULL EXPERIMENTS: RAD-ONLY IMPROVEMENTS. Compare with Figure 10 in paper.""")
+print("\n")
+
+###############################################################################
 
 def fmtRatio(frac):
   if frac is None:
