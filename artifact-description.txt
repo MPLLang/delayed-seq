@@ -22,6 +22,14 @@ is a '#').
 
 
 
+Step 4. Check results. The output of step 3 consists of tables (printed to
+stdout, and copied to ARTIFACT-RESULTS/small-output) and a few speedup
+plots (copied to ARTIFACT-RESULTS/small-figures). The tables are comparable
+to figures 9 and 10 in the paper; see the comments printed with the tables
+for more info. The speedup plots should show that the 'delay' version scales
+better than the 'array' and 'rad' versions.
+
+
 Step 4. Generate inputs for larger experiments (~2 minutes):
 $ ./generate-inputs
 
