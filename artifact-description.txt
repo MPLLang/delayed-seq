@@ -37,7 +37,7 @@ Step 5. Generate inputs for full experiments (~2 minutes).
 
 
 
-Step 6. Full experiments from paper (XXX hours). Requires at least 100GB RAM
+Step 6. Full experiments from paper (5-8 hours). Requires at least 100GB RAM
 and a large number of cores. (At least 32 cores is okay; 64 or more is
 preferable).
 
@@ -50,6 +50,10 @@ of intermediate processor counts, to see informative speedup curves.
 For example, in the paper we used `--procs 1,10,20,30,40,50,60,72` on a
 machine with 72 physical cores. With 32 cores, we would recommend
 `--procs 1,10,20,32`. With 64 cores, we recommend `--procs 1,10,20,30,40,50,64`.
+
+For reference, on our machine, the command `./run --procs 1,72` takes 4.5
+hours. This is the minimum required for reproducing Figures 9 and 10 in the
+paper.
 
 # ./run --procs <PROCLIST>
 # ./report | tee /ARTIFACT-RESULTS/full-output
