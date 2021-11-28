@@ -108,7 +108,7 @@ plots (copied to ARTIFACT-RESULTS/small-figures).
   on only a small number of cores. The speedups will not be as high due to
   the reduced problem size and smaller number of cores used.
 
-FULL EVALUATION (4.5-10 hours, optional)
+FULL EVALUATION (4.5-10 hours)
 ----------------------------------------
 
 Requires at least 100GB RAM and a large number of cores.
@@ -183,18 +183,37 @@ specified.
 
   [delayed-seq/cpp-new]$ PARLAY_NUM_THREADS=<N> bin/<BENCHMARK>.<VERSION>.cpp.bin <ARGS> -repeat <R> -warmup <W>
 
-The ml binaries are similar, but with slightly different syntax:
+The ML binaries are similar, but with slightly different syntax:
 
   [delayed-seq/ml]$ bin/<BENCHMARK>.<VERSION>.mpl-v02.bin @mpl procs <N> -- <ARGS> -repeat <R> -warmup <W>
 
-In the top-level folder, the JSON files specifies the experiments. These
-specifications are used by `scripts/gencmds` to produce "rows" of key-value
-pairs, where each row describes one experiment. Examples of keys include
-"config", "tag", "impl", etc. The config is either "cpp" or "mpl-v02", the
-tag is the benchmark name, the impl is the version of the library used, etc.
+Many of the benchmarks (all except quickhull, bfs, and grep) take only a single
+size argument, `-n <SIZE>`. This makes it easy to test performance across a
+range of problem sizes. For example, here are the commands for running the
+C++ linefit benchmark (with 'delay' version of the library, i.e. full fusion)
+on 16 cores across a range of problem sizes, with 10 repetitions and 3
+seconds of warmup.
+
+  $ cd cpp-new
+  $ make linefit.delay.cpp.bin
+  $ PARLAY_NUM_THREADS=16 bin/linefit.delay.cpp.bin -n 1000000 -repeat 10 -warmup 3
+  $ PARLAY_NUM_THREADS=16 bin/linefit.delay.cpp.bin -n 500000000 -repeat 10 -warmup 3
+
+And similarly for ML:
+
+  $ cd ml
+  $ make linefit.delay.mpl-v02.bin
+  $ bin/linefit.delay.mpl-v02.bin @mpl procs 16 -- -n 1000000 -repeat 10 -warmup 3
+  $ bin/linefit.delay.mpl-v02.bin @mpl procs 16 -- -n 500000000 -repeat 10 -warmup 3
+
+In the top-level folder, there are JSON files to specify the parameters used
+in our experiments. These specifications are passed to `scripts/gencmds` which
+produces "rows" of key-value pairs, where each row describes one experiment.
+Examples of keys include "config", "tag", "impl", etc. The config is either
+"cpp" or "mpl-v02", the tag is the benchmark name, the impl is the version of
+the library used, etc.
 
 The output of `scripts/gencmds` is then piped into `scripts/runcmds` to
 produce results. See the `run` script for more detail.
 
-Finally, the script `report` parses the results and produces tables and
-figures.
+Finally, the script `report` parses the results and produces tables and figures.
