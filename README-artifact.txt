@@ -50,13 +50,18 @@ Minimum hardware requirements:
 ------------------------------ GETTING STARTED -------------------------------
 ------------------------------------------------------------------------------
 
-Step 1: Download docker image. The image is packaged as part of this artifact,
-and is also available from Docker Hub:
+Step 1: Load docker image. The image is packaged as part of this artifact,
+and can be loaded directly:
+
+  $ sudo docker image load -i shwestrick-ppopp22-artifact-image.tar.gz
+
+If desired, the image is also available from Docker Hub:
 
   $ sudo docker pull shwestrick/ppopp22-artifact
 
 For the rest of the instructions, we assume the arifact is locally tagged
-"shwestrick/ppopp22-artifact"
+"shwestrick/ppopp22-artifact". This should be the default behavior from
+both of the above commands.
 
 
 Step 2: Start the container. First, make a local directory 'ARTIFACT-RESULTS'
