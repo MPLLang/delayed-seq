@@ -1,4 +1,4 @@
-functor MkWC (Seq : SEQUENCE) :
+structure WC:
 sig
   type 'a seq = 'a ArraySequence.t
 
@@ -18,6 +18,7 @@ struct
       fun nth i = Array.sub (a, i)
        *)
       fun nth i = ASeq.nth seq i
+      
       (* Create a delayed sequence of pairs of integers:
        * the first is 1 if it is line break, 0 otherwise;
        * the second is 1 if the start of a word, 0 otherwise.
@@ -35,9 +36,11 @@ struct
         in
           (lineBreak, wordStart)
         end
-      val x = Seq.tabulate f (ASeq.length seq)
+      (*val x = Seq.tabulate f (ASeq.length seq)
       val (lines, words) =
-        Seq.reduce (fn ((lb1, ws1), (lb2, ws2)) => (lb1 + lb2, ws1 + ws2)) (0, 0) x
+        Seq.reduce (fn ((lb1, ws1), (lb2, ws2)) => (lb1 + lb2, ws1 + ws2)) (0, 0) x*)
+      val (lines, words) =
+        SeqBasis.reduce 10000 (fn ((a,b),(c,d)) => (a+c, b+d)) (0,0) (0, ASeq.length seq) f
     in
       (lines, words, ASeq.length seq)
     end

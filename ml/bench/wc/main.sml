@@ -6,7 +6,8 @@ val filePath = CLA.parseString "infile" ""
 
 val source =
   if filePath = "" then
-    Seq.tabulate (fn _ => #" ") n
+    (*Seq.tabulate (fn _ => #" ") n*)
+    Seq.tabulate (fn i => Char.chr (Util.hash i mod 255)) n
   else
     let
       val (source, tm) = Util.getTime (fn _ => ReadFile.contentsSeq filePath)
