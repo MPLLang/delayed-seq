@@ -115,6 +115,7 @@ cutInfo bestCutStreamOfBlocks(sequence<event> const &E, range r, range r1, range
       
   for (int j=0; offset < n; offset += block_size) {
 
+    // trim last block
     size_t bsize = std::min(block_size, n - offset);
     
     // count number that end before i
@@ -125,15 +126,15 @@ cutInfo bestCutStreamOfBlocks(sequence<event> const &E, range r, range r1, range
   
     // calculate cost of each possible split location, 
     // return tuple with cost, number of ends before the location, and the index
-  
-    auto costs = parlay::tabulate(bsize, [&](size_t i) {
-	index_t num_ends = end_counts[i];
-	index_t num_ends_before = num_ends - IS_END(E[i+offset]); 
+    auto costs = parlay::tabulate(bsize, [&](size_t ii) {
+	index_t num_ends = end_counts[ii];
+	size_t i = ii + offset;
+	index_t num_ends_before = num_ends - IS_END(E[i]); 
 	index_t inLeft = i - num_ends_before; // number of points intersecting left
 	index_t inRight = n/2 - num_ends;   // number of points intersecting right
-	float leftLength = E[i+offset].v - r.min;
+	float leftLength = E[i].v - r.min;
 	float leftSurfaceArea = orthogArea + orthoPerimeter * leftLength;
-	float rightLength = r.max - E[i+offset].v;
+	float rightLength = r.max - E[i].v;
 	float rightSurfaceArea = orthogArea + orthoPerimeter * rightLength;
 	float cost = leftSurfaceArea * inLeft + rightSurfaceArea * inRight;
 	return rtype(cost, num_ends_before, i);
@@ -142,9 +143,9 @@ cutInfo bestCutStreamOfBlocks(sequence<event> const &E, range r, range r1, range
     // find minimum across all, returning the triple
     auto min_f = [&] (rtype a, rtype b) {return (std::get<0>(a) < std::get<0>(b)) ? a : b;};
     auto sum = parlay::reduce(costs, parlay::make_monoid(min_f, identity));
-    auto result = min_f(result, min_f);
+    auto result = min_f(result, sum);
   }
-  auto [cost, num_ends_before, i] = sum;
+  auto [cost, num_ends_before, i] = result;
   index_t ln = i - num_ends_before;
   index_t rn = n/2 - (num_ends_before + IS_END(E[i]));
   return cutInfo(cost, E[i].v, lon, rn);
