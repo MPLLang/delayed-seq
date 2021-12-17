@@ -143,12 +143,12 @@ cutInfo bestCutStreamOfBlocks(sequence<event> const &E, range r, range r1, range
     // find minimum across all, returning the triple
     auto min_f = [&] (rtype a, rtype b) {return (std::get<0>(a) < std::get<0>(b)) ? a : b;};
     auto sum = parlay::reduce(costs, parlay::make_monoid(min_f, identity));
-    auto result = min_f(result, sum);
+    result = min_f(result, sum);
   }
   auto [cost, num_ends_before, i] = result;
   index_t ln = i - num_ends_before;
   index_t rn = n/2 - (num_ends_before + IS_END(E[i]));
-  return cutInfo(cost, E[i].v, lon, rn);
+  return cutInfo(cost, E[i].v, ln, rn);
 }
 
 // Generate input data for the bestCut routine
