@@ -120,7 +120,7 @@ cutInfo bestCutStreamOfBlocks(sequence<event> const &E, range r, range r1, range
     
     // count number that end before i
     auto is_end = parlay::tabulate(bsize, [&] (index_t i) -> index_t {return IS_END(E[i+offset]);});
-    auto plus = [] (index_t a, index_t b) {return a + b;}
+    auto plus = [] (index_t a, index_t b) {return a + b;};
     auto end_counts = parlay::scan_inclusive(is_end, parlay::make_monoid(plus, scan_val));
     scan_val = end_counts[bsize-1];
   
