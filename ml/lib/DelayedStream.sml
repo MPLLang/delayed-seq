@@ -128,11 +128,7 @@ struct
       val trickle = stream ()
 
       fun loop (data, next) i =
-        if i >= length then
-          (data, next)
-        else if next >= Array.length data then
-          loop (resize data, next) i
-        else
+        if i < length andalso next < Array.length data then
           let
             val x = trickle i
           in
@@ -143,8 +139,12 @@ struct
             else
               loop (data, next) (i+1)
           end
+        else if next >= Array.length data then
+          loop (resize data, next) i
+        else
+          (data, next)
 
-      val (data, count) = loop (ForkJoin.alloc 100, 0) 0
+      val (data, count) = loop (ForkJoin.alloc 10, 0) 0
     in
       ArraySlice.slice (data, 0, SOME count)
     end
