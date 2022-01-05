@@ -13,6 +13,7 @@ in
   structure Seq = ArraySequence
   structure ArraySequence
 end
+DelayedStream.sml
 DelayedSeq.sml
 RadSeq.sml
 FuncSequence.sml

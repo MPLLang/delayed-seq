@@ -2,6 +2,7 @@ structure RadSeq =
 struct
 
   open DelayedSeq
+  val indexSearch = DelayedStream.indexSearch
 
   fun flatten (ss: 'a seq seq): 'a seq =
     let
