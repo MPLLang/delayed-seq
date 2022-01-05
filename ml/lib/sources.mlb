@@ -15,6 +15,7 @@ in
 end
 DelayedStream.sml
 DelayedSeq.sml
+NewDelayedSeq.sml
 RadSeq.sml
 FuncSequence.sml
 BinarySearch.sml

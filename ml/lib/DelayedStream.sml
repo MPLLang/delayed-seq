@@ -3,10 +3,7 @@ sig
   type 'a t
   type 'a stream = 'a t
 
-  (** `indexSearch (start, stop, offsetFn) k` returns which inner sequence
-    * contains index `k`. The tuple arg defines a sequence of offsets.
-    *)
-  val indexSearch: int * int * (int -> int) -> int -> int
+  val nth: 'a stream -> int -> 'a
 
   val tabulate: (int -> 'a) -> 'a stream
   val map: ('a -> 'b) -> 'a stream -> 'b stream
@@ -18,6 +15,8 @@ sig
   val applyIdx: int * 'a stream -> (int * 'a -> unit) -> unit
   val iterate: ('b * 'a -> 'b) -> 'b -> int * 'a stream -> 'b
 
+  val pack: ('a -> bool) -> (int * 'a stream) -> 'a ArraySlice.slice
+
   val makeBlockStreams:
     { blockSize: int
     , numChildren: int
@@ -25,6 +24,11 @@ sig
     , getElem: int -> int -> 'a
     }
     -> (int -> 'a stream)
+
+  (** `indexSearch (start, stop, offsetFn) k` returns which inner sequence
+    * contains index `k`. The tuple arg defines a sequence of offsets.
+    *)
+  val indexSearch: int * int * (int -> int) -> int -> int
 
 end =
 struct
@@ -62,6 +66,21 @@ struct
   type 'a stream = 'a t
 
 
+  fun nth stream i =
+    let
+      val trickle = stream ()
+
+      fun loop j =
+        let
+          val x = trickle j
+        in
+          if j = i then x else loop (j+1)
+        end
+    in
+      loop 0
+    end
+
+
   fun tabulate f =
     fn () => f
 
@@ -91,6 +110,43 @@ struct
         if i >= length then () else (g (i, trickle i); loop (i+1))
     in
       loop 0
+    end
+
+
+  fun resize arr =
+    let
+      val newCapacity = 2 * Array.length arr
+      val dst = ForkJoin.alloc newCapacity
+    in
+      Array.copy {src = arr, dst = dst, di = 0};
+      dst
+    end
+
+
+  fun pack pred (length, stream) =
+    let
+      val trickle = stream ()
+
+      fun loop (data, next) i =
+        if i >= length then
+          (data, next)
+        else if next >= Array.length data then
+          loop (resize data, next) i
+        else
+          let
+            val x = trickle i
+          in
+            if pred x then
+              ( Array.update (data, next, x)
+              ; loop (data, next+1) (i+1)
+              )
+            else
+              loop (data, next) (i+1)
+          end
+
+      val (data, count) = loop (ForkJoin.alloc 100, 0) 0
+    in
+      ArraySlice.slice (data, 0, SOME count)
     end
 
 
