@@ -1,0 +1,8 @@
+../../../lib/sources.mlb
+../MkMapReduceMCSS.sml
+local
+  DelayMCSS.sml
+in
+  structure MCSS = DelayMCSS
+end
+../main.sml

@@ -16,6 +16,12 @@ struct
   val blockSize = 5000
   fun numBlocks n = Util.ceilDiv n blockSize
 
+  fun blockStart b n = b * blockSize
+  fun blockEnd b n = Int.min (n, (b+1) * blockSize)
+  fun getBlockSize b n = blockEnd b n - blockStart b n
+  fun convertToBlockIdx i n =
+    (i div blockSize, i mod blockSize)
+
   structure A =
   struct
     open Array
@@ -58,16 +64,16 @@ struct
     | Rad rad => radnth rad i
     | Bid (n, getBlock) =>
         let
-          val bidx = i div blockSize
+          val (outer, inner) = convertToBlockIdx i n
         in
-          Stream.nth (getBlock bidx) (i mod blockSize)
+          Stream.nth (getBlock outer) inner
         end
 
 
   fun bidify (s: 'a seq) : 'a bid =
     let
       fun block start nth b =
-        Stream.tabulate (fn i => nth (start + b*blockSize + i))
+        Stream.tabulate (fn i => nth (start + b * blockSize + i))
     in
       case s of
         Full slice =>
@@ -88,12 +94,11 @@ struct
     let
       val (n, getBlock) = bidify s
     in
-      parfor 1 (0, numBlocks n) (fn i =>
+      parfor 1 (0, numBlocks n) (fn b =>
         let
-          val lo = i*blockSize
-          val hi = Int.min (lo+blockSize, n)
+          val lo = blockStart b n
         in
-          Stream.applyIdx (hi-lo, getBlock i) (fn (j, x) => g (lo+j, x))
+          Stream.applyIdx (getBlockSize b n, getBlock b) (fn (j, x) => g (lo+j, x))
         end)
     end
 
@@ -213,12 +218,8 @@ struct
       val (n, getBlock) = bidify s
       val packed: 'a rad array =
         SeqBasis.tabulate 1 (0, numBlocks n) (fn b =>
-          let
-            val lo = b*blockSize
-            val hi = Int.min (lo+blockSize, n)
-          in
-            radify (Full (Stream.pack f (hi-lo, getBlock b)))
-          end)
+          radify (Full (Stream.pack f (getBlockSize b n, getBlock b)))
+        )
       val offsets =
         SeqBasis.scan gran op+ 0 (0, numBlocks n) (radlength o A.nth packed)
       val totalLen = A.nth offsets (numBlocks n)
@@ -282,18 +283,45 @@ struct
       val nb = numBlocks n
       val blockSums =
         SeqBasis.tabulate 1 (0, nb) (fn b =>
-          let
-            val lo = b*blockSize
-            val hi = Int.min (lo+blockSize, n)
-          in
-            Stream.iterate f z (hi-lo, getBlock b)
-          end)
+          Stream.iterate f z (getBlockSize b n, getBlock b)
+        )
       val p = SeqBasis.scan gran f z (0, nb) (A.nth blockSums)
       val t = A.nth p nb
       val r = Bid (n, fn b => Stream.iteratePrefixes f (A.nth p b) (getBlock b))
     in
       (r, t)
     end
+
+
+  fun scanIncl f z s =
+    let
+      val (n, getBlock) = bidify s
+      val nb = numBlocks n
+      val blockSums =
+        SeqBasis.tabulate 1 (0, nb) (fn b =>
+          Stream.iterate f z (getBlockSize b n, getBlock b)
+        )
+      val p = SeqBasis.scan gran f z (0, nb) (A.nth blockSums)
+    in
+      Bid (n, fn b =>
+        Stream.iteratePrefixesIncl f (A.nth p b) (getBlock b))
+    end
+
+
+  fun reduce f z s =
+    case s of
+      Full xx => SeqBasis.reduce gran f z (0, length s) (AS.nth xx)
+    | Rad xx => SeqBasis.reduce gran f z (0, length s) (radnth xx)
+    | Bid (n, getBlock) =>
+        let
+          val nb = numBlocks n
+        in
+          SeqBasis.reduce gran f z (0, nb) (fn b =>
+            Stream.iterate f z (getBlockSize b n, getBlock b)
+          )
+        end
+
+
 
 
   (* ===================================================================== *)
@@ -309,8 +337,6 @@ struct
 
   fun iterate x = raise NYI
   fun iterateIdx x = raise NYI
-  fun reduce x = raise NYI
-  fun scanIncl x = raise NYI
   fun mapOption x = raise NYI
   fun rev x = raise NYI
   fun subseq x = raise NYI
