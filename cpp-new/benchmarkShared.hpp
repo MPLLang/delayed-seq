@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <assert.h>
+#include <numeric>
 #include <sys/time.h>
 #ifdef USE_HWLOC
 #include <hwloc.h>
@@ -91,11 +92,19 @@ void launch(const Bench& bench) {
     printf ("======== END WARMUP ========\n");
   }
 
+  std::vector<double> times;
+
   for (int i = 0; i < repeat_n; i++) {
     auto st = get_time();
     bench();
-    printf ("exectime %.4lfs\n", get_time() - st);
+    double elapsed = get_time() - st;
+    times.push_back(elapsed);
+    printf ("exectime %.4lfs\n", elapsed);
   }
+
+  double avg = std::reduce(times.begin(), times.end()) / ((double) times.size());
+  printf("average %.4lfs\n", avg);
+
 #ifdef CILK_RUNTIME_WITH_STATS
   __cilkg_dump_encore_stats_to_stderr();
 #endif

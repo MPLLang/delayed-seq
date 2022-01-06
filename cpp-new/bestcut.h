@@ -93,8 +93,7 @@ cutInfo bestCutNoDelay(sequence<event> const &E, range r, range r1, range r2) {
   return cutInfo(cost, E[i].v, ln, rn);
 }
 
-cutInfo bestCutStreamOfBlocks(sequence<event> const &E, range r, range r1, range r2) {
-  size_t block_size = 1000000;
+cutInfo bestCutStreamOfBlocks(size_t block_size, sequence<event> const &E, range r, range r1, range r2) {
   index_t n = E.size();
   if (n < minParallelSize)
     return bestCutSerial(E, r, r1, r2);
