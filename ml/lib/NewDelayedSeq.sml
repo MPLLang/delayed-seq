@@ -125,7 +125,7 @@ struct
         let
           val (a, i, n) = AS.base slice
         in
-          (i, i+n, fn j => A.nth a (i+j))
+          (i, i+n, A.nth a)
         end
 
     | Rad xx => xx
@@ -213,31 +213,33 @@ struct
     end
 
 
-  fun filter f (s: 'a seq) =
+  fun mapOption (f: 'a -> 'b option) (s: 'a seq) =
     let
       val (n, getBlock) = bidify s
-      val packed: 'a rad array =
-        SeqBasis.tabulate 1 (0, numBlocks n) (fn b =>
+      val nb = numBlocks n
+      val packed: 'b rad array =
+        SeqBasis.tabulate 1 (0, nb) (fn b =>
           radify (Full (Stream.pack f (getBlockSize b n, getBlock b)))
         )
       val offsets =
-        SeqBasis.scan gran op+ 0 (0, numBlocks n) (radlength o A.nth packed)
-      val totalLen = A.nth offsets (numBlocks n)
+        SeqBasis.scan gran op+ 0 (0, nb) (radlength o A.nth packed)
+      val totalLen = A.nth offsets nb
       fun offset i = A.nth offsets i
 
-      val getBlock =
+      val getBlock' =
         Stream.makeBlockStreams
           { blockSize = blockSize
-          , numChildren = numBlocks n
+          , numChildren = nb
           , offset = offset
-          , getElem = (fn i =>
-              let val child = A.nth packed i
-              in radnth child
-              end)
+          , getElem = (fn i => fn j => radnth (A.nth packed i) j)
           }
     in
-      Bid (totalLen, getBlock)
+      Bid (totalLen, getBlock')
     end
+
+
+  fun filter p s =
+    mapOption (fn x => if p x then SOME x else NONE) s
 
 
   fun inject (s, u) =
@@ -337,7 +339,6 @@ struct
 
   fun iterate x = raise NYI
   fun iterateIdx x = raise NYI
-  fun mapOption x = raise NYI
   fun rev x = raise NYI
   fun subseq x = raise NYI
   fun toList x = raise NYI

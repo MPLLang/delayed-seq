@@ -15,7 +15,7 @@ sig
   val applyIdx: int * 'a stream -> (int * 'a -> unit) -> unit
   val iterate: ('b * 'a -> 'b) -> 'b -> int * 'a stream -> 'b
 
-  val pack: ('a -> bool) -> (int * 'a stream) -> 'a ArraySlice.slice
+  val pack: ('a -> 'b option) -> (int * 'a stream) -> 'b ArraySlice.slice
 
   val makeBlockStreams:
     { blockSize: int
@@ -123,24 +123,46 @@ struct
     end
 
 
-  fun pack pred (length, stream) =
+  (** simple but less efficient: accumulate in list *)
+  (*fun pack f (length, stream) =
+    let
+      val trickle = stream ()
+
+      fun loop (data, count) i =
+        if i < length then
+          case f (trickle i) of
+            SOME y =>
+              loop (y :: data, count+1) (i+1)
+          | NONE =>
+              loop (data, count) (i+1)
+        else
+          (data, count)
+
+      val (data, count) = loop ([], 0) 0
+    in
+      ArraySlice.full (Array.fromList (List.rev data))
+      (* ArraySlice.slice (data, 0, SOME count) *)
+    end*)
+
+
+  (** more efficient: accumulate in dynamic resizing array *)
+  fun pack f (length, stream) =
     let
       val trickle = stream ()
 
       fun loop (data, next) i =
         if i < length andalso next < Array.length data then
-          let
-            val x = trickle i
-          in
-            if pred x then
-              ( Array.update (data, next, x)
+          case f (trickle i) of
+            SOME y =>
+              ( Array.update (data, next, y)
               ; loop (data, next+1) (i+1)
               )
-            else
+          | NONE =>
               loop (data, next) (i+1)
-          end
+
         else if next >= Array.length data then
           loop (resize data, next) i
+
         else
           (data, next)
 
@@ -215,10 +237,6 @@ struct
     let
       fun getBlock blockIdx =
         let
-          val lo = blockIdx * blockSize
-          val firstOuterIdx = indexSearch (0, numChildren, offset) lo
-          (* val firstInnerIdx = lo - offset firstOuterIdx *)
-
           fun advanceUntilNonEmpty i =
             if i >= numChildren orelse offset i <> offset (i+1) then
               i
@@ -227,25 +245,23 @@ struct
         in
           fn () =>
             let
+              val lo = blockIdx * blockSize
+              val firstOuterIdx = indexSearch (0, numChildren, offset) lo
               val outerIdx = ref firstOuterIdx
-              (* val innerIdx = ref firstInnerIdx *)
             in
               fn idx =>
-                let
+                (let
                   val i = !outerIdx
                   val j = lo + idx - offset i
                   (* val j = !innerIdx *)
                   val elem = getElem i j
                 in
                   if offset i + j + 1 < offset (i+1) then
-                    (* innerIdx := j+1 *) ()
+                    ()
                   else
-                    ( outerIdx := advanceUntilNonEmpty (i+1)
-                    (* ; innerIdx := 0 *)
-                    );
-
+                    outerIdx := advanceUntilNonEmpty (i+1);
                   elem
-                end
+                end)
             end
         end
 
