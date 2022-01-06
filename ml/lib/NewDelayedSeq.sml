@@ -1,6 +1,10 @@
 structure NewDelayedSeq: SEQUENCE =
 struct
 
+  exception NYI
+  exception Range
+  exception Size
+
   structure Stream = DelayedStream
 
   val for = Util.for
@@ -9,7 +13,7 @@ struct
   val alloc = ForkJoin.alloc
 
   val gran = 5000
-  val blockSize = 10000
+  val blockSize = 5000
   fun numBlocks n = Util.ceilDiv n blockSize
 
   structure A =
@@ -245,11 +249,54 @@ struct
     end
 
 
-  (* ===================================================================== *)
+  fun bidZipWith f (s1, s2) =
+    let
+      val (n, getBlock1) = bidify s1
+      val (_, getBlock2) = bidify s2
+    in
+      Bid (n, fn b => Stream.zipWith f (getBlock1 b, getBlock2 b))
+    end
 
-  exception NYI
-  exception Range
-  exception Size
+  fun radZipWith f (s1, s2) =
+    let
+      val (lo1, hi1, nth1) = radify s1
+      val (lo2, _, nth2) = radify s2
+    in
+      Rad (0, hi1-lo1, fn i => f (nth1 (lo1+i), nth2 (lo2+i)))
+    end
+
+  fun zipWith f (s1, s2) =
+    if length s1 <> length s2 then raise Size else
+    case (s1, s2) of
+      (Bid _, _) => bidZipWith f (s1, s2)
+    | (_, Bid _) => bidZipWith f (s1, s2)
+    | _ => radZipWith f (s1, s2)
+
+  fun zip (s1, s2) =
+    zipWith (fn (x, y) => (x, y)) (s1, s2)
+
+
+  fun scan f z s =
+    let
+      val (n, getBlock) = bidify s
+      val nb = numBlocks n
+      val blockSums =
+        SeqBasis.tabulate 1 (0, nb) (fn b =>
+          let
+            val lo = b*blockSize
+            val hi = Int.min (lo+blockSize, n)
+          in
+            Stream.iterate f z (hi-lo, getBlock b)
+          end)
+      val p = SeqBasis.scan gran f z (0, nb) (A.nth blockSums)
+      val t = A.nth p nb
+      val r = Bid (n, fn b => Stream.iteratePrefixes f (A.nth p b) (getBlock b))
+    in
+      (r, t)
+    end
+
+
+  (* ===================================================================== *)
 
   datatype 'a listview = NIL | CONS of 'a * 'a seq
   datatype 'a treeview = EMPTY | ONE of 'a | PAIR of 'a seq * 'a seq
@@ -263,15 +310,12 @@ struct
   fun iterate x = raise NYI
   fun iterateIdx x = raise NYI
   fun reduce x = raise NYI
-  fun scan x = raise NYI
   fun scanIncl x = raise NYI
   fun mapOption x = raise NYI
   fun rev x = raise NYI
   fun subseq x = raise NYI
   fun toList x = raise NYI
   fun toString x = raise NYI
-  fun zip x = raise NYI
-  fun zipWith x = raise NYI
 
 
   fun argmax x = raise NYI
