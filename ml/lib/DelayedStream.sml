@@ -1,54 +1,5 @@
-structure DelayedStream :>
-sig
-  type 'a t
-  type 'a stream = 'a t
-
-  val nth: 'a stream -> int -> 'a
-
-  val tabulate: (int -> 'a) -> 'a stream
-  val map: ('a -> 'b) -> 'a stream -> 'b stream
-  val mapIdx: (int * 'a -> 'b) -> 'a stream -> 'b stream
-  val zipWith: ('a * 'b -> 'c) -> 'a stream * 'b stream -> 'c stream
-  val iteratePrefixes: ('b * 'a -> 'b) -> 'b -> 'a stream -> 'b stream
-  val iteratePrefixesIncl: ('b * 'a -> 'b) -> 'b -> 'a stream -> 'b stream
-
-  val applyIdx: int * 'a stream -> (int * 'a -> unit) -> unit
-  val iterate: ('b * 'a -> 'b) -> 'b -> int * 'a stream -> 'b
-
-  val pack: ('a -> 'b option) -> (int * 'a stream) -> 'b ArraySlice.slice
-
-  val makeBlockStreams:
-    { blockSize: int
-    , numChildren: int
-    , offset: int -> int
-    , getElem: int -> int -> 'a
-    }
-    -> (int -> 'a stream)
-
-  (** `indexSearch (start, stop, offsetFn) k` returns which inner sequence
-    * contains index `k`. The tuple arg defines a sequence of offsets.
-    *)
-  val indexSearch: int * int * (int -> int) -> int -> int
-
-end =
+structure DelayedStream :> STREAM =
 struct
-
-  (* Using given offsets, find which inner sequence contains index [k] *)
-  fun indexSearch (start, stop, offset: int -> int) k =
-    case stop-start of
-      0 =>
-        raise Fail "DelayedStream.indexSearch: should not have hit 0"
-    | 1 =>
-        start
-    | n =>
-        let
-          val mid = start + (n div 2)
-        in
-          if k < offset mid then
-            indexSearch (start, mid, offset) k
-          else
-            indexSearch (mid, stop, offset) k
-        end
 
   (** A stream is a generator for a stateful trickle function:
     *   trickle = stream ()
@@ -246,7 +197,8 @@ struct
           fn () =>
             let
               val lo = blockIdx * blockSize
-              val firstOuterIdx = indexSearch (0, numChildren, offset) lo
+              val firstOuterIdx =
+                OffsetSearch.indexSearch (0, numChildren, offset) lo
               val outerIdx = ref firstOuterIdx
             in
               fn idx =>

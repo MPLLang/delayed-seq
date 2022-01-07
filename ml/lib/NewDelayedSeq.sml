@@ -1,4 +1,4 @@
-structure NewDelayedSeq: SEQUENCE =
+functor MkDelayedSeq (Stream: STREAM) : SEQUENCE =
 struct
 
   exception NYI
@@ -365,3 +365,8 @@ struct
   fun foreachG x = raise NYI
 
 end
+
+
+
+(* structure NewDelayedSeq = MkDelayedSeq (DelayedStream) *)
+structure NewDelayedSeq = MkDelayedSeq (RecursiveStream)
