@@ -81,7 +81,8 @@ struct
       val s = Seq.fromArraySeq s
       val n = Seq.length s
 
-      val idx = Seq.filter (isNewline o Seq.nth s) (Seq.tabulate (fn i => i) n)
+      val idx =
+        Seq.force (Seq.filter (isNewline o Seq.nth s) (Seq.tabulate (fn i => i) n))
       (* val idx =
         Seq.mapOption
           (fn i => if isNewline (Seq.nth s i) then SOME i else NONE)
