@@ -5,7 +5,7 @@ struct
   exception Range
   exception Size
 
-  structure Stream = DelayedStream
+  (* structure Stream = DelayedStream *)
 
   val for = Util.for
   val par = ForkJoin.par
@@ -356,6 +356,28 @@ struct
     end
 
 
+  fun subseq s (i, len) =
+    if i < 0 orelse len < 0 orelse i+len > length s then
+      raise Subscript
+    else
+      let
+        val n = length s
+        val (start, stop, nth) = radify s
+      in
+        Rad (start+i, start+i+len, nth)
+      end
+
+
+  fun take s n = subseq s (0, n)
+  fun drop s n = subseq s (n, length s - n)
+
+
+  fun toList s =
+    List.rev (iterate (fn (elems, x) => x :: elems) [] s)
+
+  fun toString f s =
+    "[" ^ String.concatWith "," (toList (map f s)) ^ "]"
+
   (* ===================================================================== *)
 
   datatype 'a listview = NIL | CONS of 'a * 'a seq
@@ -365,17 +387,11 @@ struct
   type 'a t = 'a seq
 
   fun filterIdx x = raise NYI
-
   fun iterateIdx x = raise NYI
-  fun subseq x = raise NYI
-  fun toList x = raise NYI
-  fun toString x = raise NYI
-
 
   fun argmax x = raise NYI
   fun collate x = raise NYI
   fun collect x = raise NYI
-  fun drop x = raise NYI
   fun equal x = raise NYI
   fun iteratePrefixes x = raise NYI
   fun iteratePrefixesIncl x = raise NYI
@@ -383,7 +399,6 @@ struct
   fun sort x = raise NYI
   fun splitHead x = raise NYI
   fun splitMid x = raise NYI
-  fun take x = raise NYI
   fun update x = raise NYI
   fun zipWith3 x = raise NYI
 
@@ -395,5 +410,5 @@ end
 
 
 
-(* structure NewDelayedSeq = MkDelayedSeq (DelayedStream) *)
-structure NewDelayedSeq = MkDelayedSeq (RecursiveStream)
+structure NewDelayedSeq = MkDelayedSeq (DelayedStream)
+(* structure NewDelayedSeq = MkDelayedSeq (RecursiveStream) *)
