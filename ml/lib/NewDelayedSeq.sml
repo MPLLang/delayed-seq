@@ -324,6 +324,36 @@ struct
         end
 
 
+  fun iterate f z s =
+    case s of
+      Full xx => SeqBasis.foldl f z (0, length s) (AS.nth xx)
+    | Rad xx => SeqBasis.foldl f z (0, length s) (radnth xx)
+    | Bid (n, getBlock) =>
+        Util.loop (0, numBlocks n) z (fn (z, b) =>
+          Stream.iterate f z (getBlockSize b n, getBlock b))
+
+
+  fun rev s =
+    let
+      val n = length s
+      val rads = radify s
+    in
+      tabulate (fn i => radnth rads (n-i-1)) n
+    end
+
+
+  fun append (s, t) =
+    let
+      val n = length s
+      val m = length t
+
+      val rads = radify s
+      val radt = radify t
+
+      fun elem i = if i < n then radnth rads i else radnth radt (i-n)
+    in
+      tabulate elem (n+m)
+    end
 
 
   (* ===================================================================== *)
@@ -334,12 +364,9 @@ struct
   type 'a ord = 'a * 'a -> order
   type 'a t = 'a seq
 
-  fun append x = raise NYI
   fun filterIdx x = raise NYI
 
-  fun iterate x = raise NYI
   fun iterateIdx x = raise NYI
-  fun rev x = raise NYI
   fun subseq x = raise NYI
   fun toList x = raise NYI
   fun toString x = raise NYI
