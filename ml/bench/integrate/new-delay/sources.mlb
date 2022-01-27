@@ -1,0 +1,8 @@
+../../../lib/sources.mlb
+../MkIntegrate.sml
+local
+  DelayIntegrate.sml
+in
+  structure Integrate = DelayIntegrate
+end
+../main.sml

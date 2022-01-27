@@ -1,0 +1,8 @@
+../../../lib/sources.mlb
+../MkPrimes.sml
+local
+  DelayPrimes.sml
+in
+  structure Primes = DelayPrimes
+end
+../main.sml

@@ -1,0 +1,1 @@
+structure BFS = MkBFS(NewDelayedSeq)

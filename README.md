@@ -1,5 +1,31 @@
 # delayed-seq
-Experiments with parallel delayed sequences using MPL and C++
+This repo contains all code necessary for reproducing the experiments in the
+following paper:
+
+> Parallel Block-Delayed Sequences.
+> Sam Westrick, Mike Rainey, Daniel Anderson, and Guy E. Blelloch.
+> PPoPP 2022
+
+It includes code for both
+[MPL](https://github.com/MPLLang/mpl) and C++, including both the
+delayed-sequences library and all benchmarks.
+
+An artifact was published with the paper, and is available on
+[Zenodo](https://zenodo.org/record/5733288). The version of this repo used
+to generate the artifact is preserved on the
+[ppopp22-artifact](https://github.com/mpllang/delayed-seq/tree/ppopp22-artifact)
+branch. **If you are interested in reproducing experimental results from the
+paper, we recommending using the artifact directly.**
+
+The [main](https://github.com/mpllang/delayed-seq/tree/main) branch includes
+improvements made to the libraries and benchmarks after the artifact was
+published. These changes include:
+  * For MPL, a cleaned-up library implementation which is easier to understand
+  and maintain. The new library code is available at
+  [`ml/lib/NewDelayedSeq.sml`](https://github.com/MPLLang/delayed-seq/blob/main/ml/lib/NewDelayedSeq.sml).
+  When compiling a benchmark, use `new-delay` for the cleaned-up library.
+  (For example, `cd ml && make bfs.new-delay.mpl-latest.bin`.)
+  * Small performance improvements to a few benchmarks.
 
 ## Setup
 

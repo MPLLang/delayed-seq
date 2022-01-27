@@ -13,7 +13,12 @@ in
   structure Seq = ArraySequence
   structure ArraySequence
 end
+OffsetSearch.sml
+STREAM.sml
+DelayedStream.sml
+RecursiveStream.sml
 DelayedSeq.sml
+NewDelayedSeq.sml
 RadSeq.sml
 FuncSequence.sml
 BinarySearch.sml

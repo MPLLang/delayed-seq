@@ -1,0 +1,1 @@
+structure LineFit = MkLineFit (NewDelayedSeq)

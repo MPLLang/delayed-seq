@@ -23,7 +23,7 @@ struct
 
         fun isPrime i = (Seq.nth flags i = 0w1)
       in
-        Seq.filter isPrime (Seq.tabulate (fn i => i+2) (n-1))
+        Seq.force (Seq.filter isPrime (Seq.tabulate (fn i => i+2) (n-1)))
       end
 
   fun primes n =
